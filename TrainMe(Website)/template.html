@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard - Complete Security Awareness Platform</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">P</div>
+                PhishGuard
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#campaigns">Campaigns</a></li>
+                    <li><a href="#results">Results</a></li>
+                    <li><a href="#landing-pages">Landing Pages</a></li>
+                    <li><a href="#employees">Employees</a></li>
+                    <li><a href="#analytics">Analytics</a></li>
+                    <li><a href="#training">Training</a></li>
+                </ul>
+            </nav>
+            <div class="nav-buttons" id="nav-buttons">
+                <!-- Login/Logout buttons will be populated by JavaScript -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <div style="background: #dbeafe; color: #2563eb; padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;">
+                        🛡️ Enterprise Security Platform
+                    </div>
+                    <h1>Train Your Team to <span class="highlight">Detect Phishing</span></h1>
+                    <p>PhishGuard empowers organizations to build human firewalls through realistic simulations and comprehensive security awareness training.</p>
+                    <div class="hero-buttons" id="hero-buttons">
+                        <!-- Buttons will be populated by JavaScript based on login status -->
+                    </div>
+                    <div class="hero-benefits">
+                        <div class="benefit">No credit card required</div>
+                        <div class="benefit">14-day free trial</div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="security-icon">🛡️</div>
+                    <div style="color: white; text-align: center;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Complete Security Awareness Platform</h3>
+                        <p style="opacity: 0.9;">Everything you need to build and maintain a security-conscious workforce.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Platform Features Section -->
+        <section class="platform">
+            <div class="platform-container">
+                <h2>Complete Security Awareness Platform</h2>
+                <p>Everything you need to build and maintain a security-conscious workforce.</p>
+                
+                <div class="features-grid">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">📧</div>
+                        <h3>Realistic Phishing Campaigns</h3>
+                        <p>Create authentic phishing simulations using industry-tested templates and scenarios.</p>
+                    </div>
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">📊</div>
+                        <h3>Advanced Analytics</h3>
+                        <p>Track metrics, identify vulnerabilities, and measure improvement over time.</p>
+                    </div>
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">🎓</div>
+                        <h3>Interactive Training</h3>
+                        <p>Engage employees with dynamic security awareness modules and assessments.</p>
+                    </div>
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">🛡️</div>
+                        <h3>Enterprise Security</h3>
+                        <p>Bank-level encryption and compliance with industry security standards.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="how-it-works">
+            <div class="how-it-works-container">
+                <h2>How PhishGuard Works</h2>
+                <p>Simple, effective, and proven methodology.</p>
+                
+                <div class="steps">
+                    <div class="step fade-in">
+                        <div class="step-number">01</div>
+                        <h3>Launch Campaigns</h3>
+                        <p>Deploy realistic phishing simulations to your employees.</p>
+                    </div>
+                    <div class="step fade-in">
+                        <div class="step-number">02</div>
+                        <h3>Track Results</h3>
+                        <p>Monitor who clicks, who reports, and identify at-risk users.</p>
+                    </div>
+                    <div class="step fade-in">
+                        <div class="step-number">03</div>
+                        <h3>Train & Improve</h3>
+                        <p>Provide targeted training and measure security awareness growth.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Banner -->
+        <section class="security-banner">
+            <div class="security-banner-container">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔓</div>
+                <h2>Ready to Strengthen Your Security?</h2>
+                <p>Join thousands of organizations protecting their employees from phishing attacks. Start your free trial today.</p>
+                <a href="#" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;">Start Free Trial</a>
+            </div>
+        </section>
+
+        <!-- Dashboard Section (Hidden by default) -->
+        <section id="dashboard" class="dashboard" style="display: none;">
+            <div class="dashboard-container">
+                <h2>Admin Dashboard</h2>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3>Total Campaigns</h3>
+                        <div class="stat-number" id="total-campaigns">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Campaigns</h3>
+                        <div class="stat-number" id="active-campaigns">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Recipients</h3>
+                        <div class="stat-number" id="total-recipients">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Click Rate</h3>
+                        <div class="stat-number" id="click-rate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Report Rate</h3>
+                        <div class="stat-number" id="report-rate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Success Rate</h3>
+                        <div class="stat-number" id="success-rate">0%</div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-content">
+                    <div class="dashboard-section">
+                        <h3>Department Performance</h3>
+                        <div id="department-stats" class="department-stats">
+                            <!-- Department stats will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-section">
+                        <h3>Recent Activity</h3>
+                        <div id="recent-activity" class="activity-list">
+                            <!-- Recent activity will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-actions">
+                    <button onclick="createCampaign()" class="btn btn-primary">Create New Campaign</button>
+                    <button onclick="viewCampaigns()" class="btn btn-outline">View All Campaigns</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Campaigns Section (Hidden by default) -->
+        <section id="campaigns" class="campaigns" style="display: none;">
+            <div class="campaigns-container">
+                <h2>Campaign Management</h2>
+                <div id="campaigns-list">
+                    <!-- Campaigns will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Training Section (Hidden by default) -->
+        <section id="training" class="training" style="display: none;">
+            <div class="training-container">
+                <h2>Security Training</h2>
+                <div class="training-modules">
+                    <div class="training-card">
+                        <h3>Phishing Awareness</h3>
+                        <p>Learn to identify and avoid phishing attacks</p>
+                        <button class="btn btn-primary">Start Training</button>
+                    </div>
+                    <div class="training-card">
+                        <h3>Password Security</h3>
+                        <p>Best practices for secure passwords</p>
+                        <button class="btn btn-primary">Start Training</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section (Hidden by default) -->
+        <section id="profile" class="profile" style="display: none;">
+            <div class="profile-container">
+                <h2>My Profile</h2>
+                <div class="profile-info">
+                    <p><strong>Name:</strong> <span id="user-name">Loading...</span></p>
+                    <p><strong>Role:</strong> <span id="user-role">Loading...</span></p>
+                    <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login to TrainMe</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <div class="demo-credentials">
+                <h4>Demo Credentials:</h4>
+                <p><strong>Admin:</strong> admin@trainme.com / admin123</p>
+                <p><strong>Employee:</strong> employee@trainme.com / emp123</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let isLoggedIn = false;
+
+        // Check authentication status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            setupEventListeners();
+        });
+
+        // Check if user is logged in
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('index.php?api=auth&action=check');
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    currentUser = data;
+                    isLoggedIn = true;
+                    updateUIForLoggedInUser();
+                } else {
+                    updateUIForGuest();
+                }
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                updateUIForGuest();
+            }
+        }
+
+        // Update UI for logged in user
+        function updateUIForLoggedInUser() {
+            const navButtons = document.getElementById('nav-buttons');
+            const heroButtons = document.getElementById('hero-buttons');
+            
+            // Navigation buttons
+            navButtons.innerHTML = `
+                <span style="margin-right: 1rem; color: #374151;">Welcome, ${currentUser.name}</span>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+                ${currentUser.role === 'admin' ? '<button onclick="showSection(\'dashboard\')" class="btn btn-primary">Dashboard</button>' : ''}
+            `;
+            
+            // Hero buttons
+            if (currentUser.role === 'admin') {
+                heroButtons.innerHTML = `
+                    <button onclick="showSection('dashboard')" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">Admin Dashboard</button>
+                    <button onclick="showSection('campaigns')" class="btn btn-outline" style="font-size: 1.1rem; padding: 1rem 2rem;">Manage Campaigns</button>
+                `;
+            } else {
+                heroButtons.innerHTML = `
+                    <button onclick="showSection('training')" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">View Training</button>
+                    <button onclick="showSection('profile')" class="btn btn-outline" style="font-size: 1.1rem; padding: 1rem 2rem;">My Profile</button>
+                `;
+            }
+            
+            // Update profile info
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('user-role').textContent = currentUser.role;
+            document.getElementById('user-email').textContent = currentUser.email || 'N/A';
+        }
+
+        // Update UI for guest user
+        function updateUIForGuest() {
+            const navButtons = document.getElementById('nav-buttons');
+            const heroButtons = document.getElementById('hero-buttons');
+            
+            // Navigation buttons
+            navButtons.innerHTML = `
+                <button onclick="showLoginModal()" class="btn btn-outline">Sign In</button>
+                <button onclick="showLoginModal()" class="btn btn-primary">Get Started</button>
+            `;
+            
+            // Hero buttons
+            heroButtons.innerHTML = `
+                <button onclick="showLoginModal()" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">Start Free Trial</button>
+                <button onclick="showLoginModal()" class="btn btn-outline" style="font-size: 1.1rem; padding: 1rem 2rem;">View Demo</button>
+            `;
+        }
+
+        // Show login modal
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        // Hide login modal
+        function hideLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        // Login function
+        async function login(email, password) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'login');
+                formData.append('email', email);
+                formData.append('password', password);
+
+                const response = await fetch('index.php?api=auth', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    hideLoginModal();
+                    location.reload(); // Reload to update UI
+                } else {
+                    alert('Login failed: ' + (data.error || 'Invalid credentials'));
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                const response = await fetch('index.php?api=auth&action=logout', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    location.reload(); // Reload to update UI
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                location.reload(); // Force reload anyway
+            }
+        }
+
+        // Show specific section
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = ['dashboard', 'campaigns', 'training', 'profile'];
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+            
+            // Show the requested section
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+                
+                // Load data for specific sections
+                if (sectionName === 'dashboard' && currentUser.role === 'admin') {
+                    loadDashboardData();
+                } else if (sectionName === 'campaigns' && currentUser.role === 'admin') {
+                    loadCampaignsData();
+                }
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load detailed stats
+                const statsResponse = await fetch('index.php?api=campaigns&action=stats');
+                const statsData = await statsResponse.json();
+                
+                if (statsData.success) {
+                    const stats = statsData.stats;
+                    
+                    // Update main statistics
+                    document.getElementById('total-campaigns').textContent = stats.total_campaigns;
+                    document.getElementById('active-campaigns').textContent = stats.active_campaigns;
+                    document.getElementById('total-recipients').textContent = stats.total_recipients;
+                    document.getElementById('click-rate').textContent = stats.click_rate + '%';
+                    document.getElementById('report-rate').textContent = stats.report_rate + '%';
+                    document.getElementById('success-rate').textContent = stats.success_rate + '%';
+                    
+                    // Load department performance
+                    loadDepartmentStats(stats.departments);
+                    
+                    // Load recent activity
+                    loadRecentActivity(stats.recent_activity);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Load department statistics
+        function loadDepartmentStats(departments) {
+            const departmentStats = document.getElementById('department-stats');
+            departmentStats.innerHTML = '';
+            
+            Object.entries(departments).forEach(([dept, count]) => {
+                const deptCard = document.createElement('div');
+                deptCard.className = 'department-card';
+                deptCard.innerHTML = `
+                    <div class="department-name">${dept}</div>
+                    <div class="department-count">${count} recipients</div>
+                `;
+                departmentStats.appendChild(deptCard);
+            });
+        }
+
+        // Load recent activity
+        function loadRecentActivity(activities) {
+            const activityList = document.getElementById('recent-activity');
+            activityList.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                activityItem.innerHTML = `
+                    <div class="activity-content">
+                        <div class="activity-action">${activity.action}</div>
+                        <div class="activity-details">${activity.campaign}</div>
+                        <div class="activity-meta">
+                            ${activity.recipients} recipients • ${activity.timestamp}
+                        </div>
+                    </div>
+                `;
+                activityList.appendChild(activityItem);
+            });
+        }
+
+        // Load campaigns data
+        async function loadCampaignsData() {
+            try {
+                const response = await fetch('index.php?api=campaigns&action=list');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const campaignsList = document.getElementById('campaigns-list');
+                    campaignsList.innerHTML = '';
+                    
+                    data.campaigns.forEach(campaign => {
+                        const campaignCard = document.createElement('div');
+                        campaignCard.className = 'campaign-card';
+                        campaignCard.innerHTML = `
+                            <h3>${campaign.name}</h3>
+                            <p><strong>Status:</strong> ${campaign.status}</p>
+                            <p><strong>Recipients:</strong> ${campaign.recipients}</p>
+                            <p><strong>Clicks:</strong> ${campaign.clicks}</p>
+                            <p><strong>Reports:</strong> ${campaign.reports}</p>
+                            <div class="campaign-actions">
+                                <button onclick="sendCampaign(${campaign.id})" class="btn btn-primary">Send</button>
+                                <button onclick="viewCampaignDetails(${campaign.id})" class="btn btn-outline">View Details</button>
+                            </div>
+                        `;
+                        campaignsList.appendChild(campaignCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading campaigns data:', error);
+            }
+        }
+
+        // Campaign functions
+        function createCampaign() {
+            alert('Create Campaign functionality - This would open a campaign creation form');
+        }
+
+        function viewCampaigns() {
+            showSection('campaigns');
+        }
+
+        function sendCampaign(campaignId) {
+            alert(`Sending campaign ${campaignId} - This would trigger the email sending process`);
+        }
+
+        function viewCampaignDetails(campaignId) {
+            alert(`Viewing details for campaign ${campaignId} - This would show detailed analytics`);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Login form submission
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                login(email, password);
+            });
+
+            // Close modal when clicking X
+            document.querySelector('.close').addEventListener('click', hideLoginModal);
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                const modal = document.getElementById('loginModal');
+                if (e.target === modal) {
+                    hideLoginModal();
+                }
+            });
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all elements with fade-in class
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
