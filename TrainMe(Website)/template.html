@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishGuard - Complete Security Awareness Platform</title>
+    <title>TrainMe - Complete Security Awareness Platform</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,8 +11,8 @@
     <header class="header">
         <div class="nav-container">
             <div class="logo">
-                <div class="logo-icon">P</div>
-                PhishGuard
+                <div class="logo-icon">T</div>
+                TrainMe
             </div>
             <nav>
                 <ul class="nav-links">
@@ -41,7 +41,7 @@
                         🛡️ Enterprise Security Platform
                     </div>
                     <h1>Train Your Team to <span class="highlight">Detect Phishing</span></h1>
-                    <p>PhishGuard empowers organizations to build human firewalls through realistic simulations and comprehensive security awareness training.</p>
+                    <p>TrainMe empowers organizations to build human firewalls through realistic simulations and comprehensive security awareness training.</p>
                     <div class="hero-buttons" id="hero-buttons">
                         <!-- Buttons will be populated by JavaScript based on login status -->
                     </div>
@@ -94,7 +94,7 @@
         <!-- How It Works Section -->
         <section class="how-it-works">
             <div class="how-it-works-container">
-                <h2>How PhishGuard Works</h2>
+                <h2>How TrainMe Works</h2>
                 <p>Simple, effective, and proven methodology.</p>
                 
                 <div class="steps">
@@ -315,14 +315,14 @@
             
             // Navigation buttons
             navButtons.innerHTML = `
-                <button onclick="showLoginModal()" class="btn btn-outline">Sign In</button>
-                <button onclick="showLoginModal()" class="btn btn-primary">Get Started</button>
+                <a href="login.php" class="btn btn-outline">Sign In</a>
+                <a href="signup.php" class="btn btn-primary">Get Started</a>
             `;
             
             // Hero buttons
             heroButtons.innerHTML = `
-                <button onclick="showLoginModal()" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">Start Free Trial</button>
-                <button onclick="showLoginModal()" class="btn btn-outline" style="font-size: 1.1rem; padding: 1rem 2rem;">View Demo</button>
+                <a href="login.php" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem; text-decoration: none; display: inline-block;">Start Free Trial</a>
+                <a href="login.php" class="btn btn-outline" style="font-size: 1.1rem; padding: 1rem 2rem; text-decoration: none; display: inline-block;">View Demo</a>
             `;
         }
 

@@ -8,7 +8,7 @@ $backend_config = [
         'host' => 'localhost',
         'dbname' => 'trainme_db',
         'username' => 'root',
-        'password' => ''
+        'password' => 'Eyadelmo2zy69'
     ],
     'email' => [
         'sendgrid_api_key' => 'your_sendgrid_key_here',
@@ -21,6 +21,31 @@ $backend_config = [
         'base_url' => (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']
     ]
 ];
+
+// Database connection function
+function getDBConnection() {
+    global $backend_config;
+    static $pdo = null;
+    
+    if ($pdo === null) {
+        try {
+            $db = $backend_config['database'];
+            $dsn = "mysql:host={$db['host']};dbname={$db['dbname']};charset=utf8mb4";
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ];
+            $pdo = new PDO($dsn, $db['username'], $db['password'], $options);
+        } catch (PDOException $e) {
+            // Return null on error - will be handled by calling code
+            error_log("Database connection error: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    return $pdo;
+}
 
 // API Endpoints for Frontend (Amr)
 if (isset($_GET['api'])) {
@@ -55,20 +80,160 @@ function handleAuthAPI() {
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
             
-            // Simulate authentication (replace with real DB check)
-            if ($email === 'admin@trainme.com' && $password === 'admin123') {
-                $_SESSION['user_id'] = 1;
-                $_SESSION['user_role'] = 'admin';
-                $_SESSION['user_name'] = 'Admin User';
-                echo json_encode(['success' => true, 'role' => 'admin']);
-            } elseif ($email === 'employee@trainme.com' && $password === 'emp123') {
-                $_SESSION['user_id'] = 2;
-                $_SESSION['user_role'] = 'employee';
-                $_SESSION['user_name'] = 'Employee User';
-                echo json_encode(['success' => true, 'role' => 'employee']);
-            } else {
-                http_response_code(401);
-                echo json_encode(['error' => 'Invalid credentials']);
+            if (empty($email) || empty($password)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Email and password are required']);
+                return;
+            }
+            
+            $pdo = getDBConnection();
+            if ($pdo === null) {
+                // Fallback to hardcoded credentials if DB connection fails
+                if ($email === 'admin@trainme.com' && $password === 'admin123') {
+                    $_SESSION['user_id'] = 1;
+                    $_SESSION['user_role'] = 'admin';
+                    $_SESSION['user_name'] = 'Admin User';
+                    echo json_encode(['success' => true, 'role' => 'admin']);
+                } elseif ($email === 'employee@trainme.com' && $password === 'emp123') {
+                    $_SESSION['user_id'] = 2;
+                    $_SESSION['user_role'] = 'employee';
+                    $_SESSION['user_name'] = 'Employee User';
+                    echo json_encode(['success' => true, 'role' => 'employee']);
+                } else {
+                    http_response_code(401);
+                    echo json_encode(['error' => 'Invalid credentials']);
+                }
+                return;
+            }
+            
+            try {
+                // Get the selected role from the form
+                $selectedRole = $_POST['role'] ?? '';
+                
+                if (empty($selectedRole)) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Please select a role (Employee or Admin)']);
+                    return;
+                }
+                
+                // Check both email AND role
+                $stmt = $pdo->prepare("SELECT id, name, email, password, role FROM users WHERE email = ? AND role = ?");
+                $stmt->execute([$email, $selectedRole]);
+                $user = $stmt->fetch();
+                
+                if ($user && password_verify($password, $user['password'])) {
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_role'] = $user['role'];
+                    $_SESSION['user_name'] = $user['name'];
+                    echo json_encode([
+                        'success' => true, 
+                        'role' => $user['role'],
+                        'name' => $user['name']
+                    ]);
+                } else {
+                    http_response_code(401);
+                    echo json_encode(['error' => 'Invalid credentials or role mismatch. Please check your email, password, and selected role.']);
+                }
+            } catch (PDOException $e) {
+                error_log("Login error: " . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(['error' => 'Database error. Please try again.']);
+            }
+            break;
+            
+        case 'register':
+            $name = $_POST['name'] ?? '';
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
+            $role = $_POST['role'] ?? 'employee';
+            
+            // Validation
+            if (empty($name) || empty($email) || empty($password)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Name, email, and password are required']);
+                return;
+            }
+            
+            if (strlen($name) < 2) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Name must be at least 2 characters long']);
+                return;
+            }
+            
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid email address']);
+                return;
+            }
+            
+            if (strlen($password) < 6) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Password must be at least 6 characters long']);
+                return;
+            }
+            
+            if (!in_array($role, ['employee', 'admin'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid role selected']);
+                return;
+            }
+            
+            $pdo = getDBConnection();
+            if ($pdo === null) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Database connection failed. Please try again later.']);
+                return;
+            }
+            
+            try {
+                // Check if email+role combination already exists (allow same email with different roles)
+                $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND role = ?");
+                $stmt->execute([$email, $role]);
+                if ($stmt->fetch()) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'This email is already registered as ' . $role . '. Please use a different email or sign in.']);
+                    return;
+                }
+                
+                // Hash password
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                
+                // Check if password_hash column exists, then insert accordingly
+                try {
+                    // Try with password_hash column first
+                    $stmt = $pdo->prepare("INSERT INTO users (name, email, password, password_hash, role) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$name, $email, $hashedPassword, $hashedPassword, $role]);
+                } catch (PDOException $e) {
+                    // If password_hash column doesn't exist, try without it
+                    if (strpos($e->getMessage(), 'password_hash') !== false || strpos($e->getMessage(), 'Unknown column') !== false) {
+                        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+                        $stmt->execute([$name, $email, $hashedPassword, $role]);
+                    } else {
+                        // Re-throw if it's a different error
+                        throw $e;
+                    }
+                }
+                
+                // Auto-login after registration
+                $userId = $pdo->lastInsertId();
+                $_SESSION['user_id'] = $userId;
+                $_SESSION['user_role'] = $role;
+                $_SESSION['user_name'] = $name;
+                
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Account created successfully',
+                    'role' => $role,
+                    'name' => $name
+                ]);
+            } catch (PDOException $e) {
+                error_log("Registration error: " . $e->getMessage());
+                http_response_code(500);
+                // Return more detailed error for debugging (remove in production)
+                echo json_encode([
+                    'error' => 'Registration failed: ' . $e->getMessage(),
+                    'details' => 'Check server logs for more information'
+                ]);
             }
             break;
             
