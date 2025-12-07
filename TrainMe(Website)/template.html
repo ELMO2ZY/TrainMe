@@ -16,13 +16,10 @@
             </div>
             <nav>
                 <ul class="nav-links">
-                    <li><a href="#dashboard">Dashboard</a></li>
-                    <li><a href="#campaigns">Campaigns</a></li>
-                    <li><a href="#results">Results</a></li>
-                    <li><a href="#landing-pages">Landing Pages</a></li>
-                    <li><a href="#employees">Employees</a></li>
-                    <li><a href="#analytics">Analytics</a></li>
-                    <li><a href="#training">Training</a></li>
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#platform" class="nav-link">Platform</a></li>
+                    <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+                    <li><a href="#security-banner" class="nav-link">Get Started</a></li>
                 </ul>
             </nav>
             <div class="nav-buttons" id="nav-buttons">
@@ -34,7 +31,7 @@
     <!-- Main Content -->
     <main class="main-content">
         <!-- Hero Section -->
-        <section class="hero">
+        <section class="hero" id="home">
             <div class="hero-container">
                 <div class="hero-content">
                     <div style="background: #dbeafe; color: #2563eb; padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;">
@@ -61,7 +58,7 @@
         </section>
 
         <!-- Platform Features Section -->
-        <section class="platform">
+        <section class="platform" id="platform">
             <div class="platform-container">
                 <h2>Complete Security Awareness Platform</h2>
                 <p>Everything you need to build and maintain a security-conscious workforce.</p>
@@ -92,7 +89,7 @@
         </section>
 
         <!-- How It Works Section -->
-        <section class="how-it-works">
+        <section class="how-it-works" id="how-it-works">
             <div class="how-it-works-container">
                 <h2>How TrainMe Works</h2>
                 <p>Simple, effective, and proven methodology.</p>
@@ -118,7 +115,7 @@
         </section>
 
         <!-- Security Banner -->
-        <section class="security-banner">
+        <section class="security-banner" id="security-banner">
             <div class="security-banner-container">
                 <div style="font-size: 3rem; margin-bottom: 1rem;">🔓</div>
                 <h2>Ready to Strengthen Your Security?</h2>
@@ -543,7 +540,7 @@
             });
         }
 
-        // Smooth scrolling for navigation links
+        // Smooth scrolling for navigation links + active state handling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -553,6 +550,14 @@
                         behavior: 'smooth',
                         block: 'start'
                     });
+                }
+
+                // Update active state for header nav links
+                if (this.classList.contains('nav-link')) {
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                    });
+                    this.classList.add('active');
                 }
             });
         });

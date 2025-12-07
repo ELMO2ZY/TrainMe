@@ -64,6 +64,9 @@ if (isset($_GET['api'])) {
         case 'email':
             handleEmailAPI();
             break;
+        case 'users':
+            handleUsersAPI();
+            break;
         default:
             http_response_code(404);
             echo json_encode(['error' => 'API endpoint not found']);
@@ -125,6 +128,8 @@ function handleAuthAPI() {
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_role'] = $user['role'];
                     $_SESSION['user_name'] = $user['name'];
+                    // Store last login time for this session
+                    $_SESSION['last_login'] = date('Y-m-d H:i:s');
                     echo json_encode([
                         'success' => true, 
                         'role' => $user['role'],
@@ -269,64 +274,21 @@ function handleCampaignsAPI() {
     
     switch($action) {
         case 'list':
-            // Return realistic campaigns data
-            $campaigns = [
-                [
-                    'id' => 1,
-                    'name' => 'Microsoft Security Alert - Q1 2024',
-                    'status' => 'active',
-                    'recipients' => 150,
-                    'clicks' => 45,
-                    'reports' => 12,
-                    'created_at' => '2024-01-15',
-                    'template_type' => 'microsoft',
-                    'department' => 'All Departments'
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'PayPal Payment Verification',
-                    'status' => 'completed',
-                    'recipients' => 80,
-                    'clicks' => 22,
-                    'reports' => 8,
-                    'created_at' => '2024-01-10',
-                    'template_type' => 'paypal',
-                    'department' => 'Finance'
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'HR Policy Update Notice',
-                    'status' => 'active',
-                    'recipients' => 200,
-                    'clicks' => 35,
-                    'reports' => 15,
-                    'created_at' => '2024-01-20',
-                    'template_type' => 'hr_notice',
-                    'department' => 'Human Resources'
-                ],
-                [
-                    'id' => 4,
-                    'name' => 'IT Security Training Reminder',
-                    'status' => 'draft',
-                    'recipients' => 0,
-                    'clicks' => 0,
-                    'reports' => 0,
-                    'created_at' => '2024-01-25',
-                    'template_type' => 'attachment',
-                    'department' => 'IT'
-                ],
-                [
-                    'id' => 5,
-                    'name' => 'Bank Account Verification',
-                    'status' => 'completed',
-                    'recipients' => 120,
-                    'clicks' => 18,
-                    'reports' => 25,
-                    'created_at' => '2024-01-05',
-                    'template_type' => 'fake_download',
-                    'department' => 'Accounting'
-                ]
-            ];
+            // Try to load campaigns from database (if campaigns table exists)
+            $pdo = getDBConnection();
+            $campaigns = [];
+
+            if ($pdo !== null) {
+                try {
+                    $stmt = $pdo->query("SELECT id, name, status, department, recipients, clicks, reports, created_at FROM campaigns ORDER BY created_at DESC");
+                    $campaigns = $stmt->fetchAll();
+                } catch (PDOException $e) {
+                    // If campaigns table doesn't exist yet, fall back to empty list
+                    error_log("Error fetching campaigns: " . $e->getMessage());
+                    $campaigns = [];
+                }
+            }
+
             echo json_encode(['success' => true, 'campaigns' => $campaigns]);
             break;
             
@@ -368,44 +330,162 @@ function handleCampaignsAPI() {
             break;
             
         case 'stats':
-            // Return dashboard statistics
+            $pdo = getDBConnection();
+            
+            // Get total users
+            $totalUsers = 0;
+            if ($pdo !== null) {
+                try {
+                    $stmt = $pdo->query("SELECT COUNT(*) as total FROM users WHERE role = 'employee'");
+                    $result = $stmt->fetch();
+                    $totalUsers = $result['total'] ?? 0;
+                } catch (PDOException $e) {
+                    error_log("Error fetching user stats: " . $e->getMessage());
+                }
+            }
+            
+            // Calculate training statistics
+            $totalModules = 4; // phishing, password, data, browsing
+            $totalCompletions = 0;
+            $totalScoreSum = 0;
+            $moduleCompletions = [
+                'phishing' => 0,
+                'password' => 0,
+                'data' => 0,
+                'browsing' => 0
+            ];
+            $moduleScores = [
+                'phishing' => 0,
+                'password' => 0,
+                'data' => 0,
+                'browsing' => 0
+            ];
+            $recentActivity = [];
+            
+            if ($pdo !== null) {
+                try {
+                    // Get all training progress
+                    $stmt = $pdo->query("
+                        SELECT tp.*, u.name as user_name 
+                        FROM training_progress tp
+                        JOIN users u ON tp.user_id = u.id
+                        ORDER BY tp.completed_at DESC
+                    ");
+                    $allProgress = $stmt->fetchAll();
+                    
+                    foreach ($allProgress as $progress) {
+                        $moduleKey = $progress['module_key'];
+                        $score = (int)$progress['score'];
+                        
+                        $totalCompletions++;
+                        $totalScoreSum += $score;
+                        
+                        // Count module completions (initialize if not exists)
+                        if (!isset($moduleCompletions[$moduleKey])) {
+                            $moduleCompletions[$moduleKey] = 0;
+                            $moduleScores[$moduleKey] = 0;
+                        }
+                        $moduleCompletions[$moduleKey]++;
+                        $moduleScores[$moduleKey] += $score;
+                    }
+                    
+                    // Build recent activity from training completions
+                    foreach (array_slice($allProgress, 0, 5) as $progress) {
+                        $moduleNames = [
+                            'phishing' => 'Phishing Awareness',
+                            'password' => 'Password Security',
+                            'data' => 'Data Protection',
+                            'browsing' => 'Safe Browsing'
+                        ];
+                        $moduleName = $moduleNames[$progress['module_key']] ?? $progress['module_key'];
+                        $recentActivity[] = [
+                            'action' => 'Completed Training',
+                            'campaign' => $moduleName . ' (' . $progress['score'] . '%)',
+                            'timestamp' => $progress['completed_at'],
+                            'recipients' => $progress['user_name']
+                        ];
+                    }
+                } catch (PDOException $e) {
+                    // If training_progress table doesn't exist yet, use empty data
+                    error_log("Error fetching training stats: " . $e->getMessage());
+                }
+            }
+            
+            // Calculate rates based on training completion
+            // Click Rate = percentage of users who haven't completed all modules (susceptibility)
+            $usersWithAllModules = 0;
+            if ($pdo !== null && $totalUsers > 0) {
+                try {
+                    $stmt = $pdo->query("
+                        SELECT user_id, COUNT(DISTINCT module_key) as module_count
+                        FROM training_progress
+                        GROUP BY user_id
+                        HAVING module_count = $totalModules
+                    ");
+                    $usersWithAllModules = count($stmt->fetchAll());
+                } catch (PDOException $e) {
+                    error_log("Error calculating completion stats: " . $e->getMessage());
+                }
+            }
+            
+            $incompleteUsers = max(0, $totalUsers - $usersWithAllModules);
+            $clickRate = $totalUsers > 0 ? round(($incompleteUsers / $totalUsers) * 100, 1) : 0;
+            
+            // Report Rate = percentage of users who have completed at least one module (engagement/awareness)
+            $usersWithAnyModule = 0;
+            if ($pdo !== null && $totalUsers > 0) {
+                try {
+                    $stmt = $pdo->query("SELECT COUNT(DISTINCT user_id) as count FROM training_progress");
+                    $result = $stmt->fetch();
+                    $usersWithAnyModule = $result['count'] ?? 0;
+                } catch (PDOException $e) {
+                    error_log("Error calculating report stats: " . $e->getMessage());
+                }
+            }
+            $reportRate = $totalUsers > 0 ? round(($usersWithAnyModule / $totalUsers) * 100, 1) : 0;
+            
+            // Success Rate = percentage of all possible training completions that have been completed
+            // This shows overall training completion progress across all users
+            // Formula: (actual completions) / (total users × 4 modules) × 100
+            $maxPossibleCompletions = $totalUsers * $totalModules;
+            $successRate = $maxPossibleCompletions > 0 ? round(($totalCompletions / $maxPossibleCompletions) * 100, 1) : 0;
+            
+            // Also calculate average score for reference (can be used elsewhere)
+            $avgScore = $totalCompletions > 0 ? round($totalScoreSum / $totalCompletions, 1) : 0;
+            
+            // Calculate department stats (group by user for now, can be enhanced later)
+            $departments = [];
+            if ($totalUsers > 0) {
+                $departments['All Employees'] = $totalUsers;
+            }
+            
+            // For campaigns compatibility, set these values
+            $totalCampaigns = 0; // Not using campaigns anymore
+            $activeCampaigns = 0;
+            $totalRecipients = $totalUsers;
+            $totalClicks = $incompleteUsers;
+            $totalReports = $usersWithAnyModule;
+
             $stats = [
-                'total_campaigns' => 5,
-                'active_campaigns' => 2,
-                'total_recipients' => 550,
-                'total_clicks' => 120,
-                'total_reports' => 60,
-                'click_rate' => 21.8,
-                'report_rate' => 10.9,
-                'success_rate' => 78.2,
-                'departments' => [
-                    'All Departments' => 150,
-                    'Finance' => 80,
-                    'Human Resources' => 200,
-                    'IT' => 0,
-                    'Accounting' => 120
-                ],
-                'recent_activity' => [
-                    [
-                        'action' => 'Campaign Sent',
-                        'campaign' => 'Microsoft Security Alert - Q1 2024',
-                        'timestamp' => '2024-01-25 14:30:00',
-                        'recipients' => 150
-                    ],
-                    [
-                        'action' => 'Campaign Completed',
-                        'campaign' => 'PayPal Payment Verification',
-                        'timestamp' => '2024-01-24 16:45:00',
-                        'recipients' => 80
-                    ],
-                    [
-                        'action' => 'High Click Rate',
-                        'campaign' => 'HR Policy Update Notice',
-                        'timestamp' => '2024-01-23 09:15:00',
-                        'recipients' => 200
-                    ]
+                'total_campaigns' => $totalCampaigns,
+                'active_campaigns' => $activeCampaigns,
+                'total_recipients' => $totalRecipients,
+                'total_clicks' => $totalClicks,
+                'total_reports' => $totalReports,
+                'click_rate' => $clickRate,
+                'report_rate' => $reportRate,
+                'success_rate' => $successRate,
+                'total_users' => $totalUsers,
+                'departments' => $departments,
+                'recent_activity' => $recentActivity,
+                'training_stats' => [
+                    'total_completions' => $totalCompletions,
+                    'average_score' => $avgScore,
+                    'module_completions' => $moduleCompletions,
+                    'users_with_all_modules' => $usersWithAllModules
                 ]
             ];
+
             echo json_encode(['success' => true, 'stats' => $stats]);
             break;
     }
@@ -478,6 +558,133 @@ function handleEmailAPI() {
                 ]
             ];
             echo json_encode(['success' => true, 'templates' => $templates]);
+            break;
+    }
+}
+
+// Users API
+function handleUsersAPI() {
+    if (!isset($_SESSION['user_id'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Not authenticated']);
+        return;
+    }
+    
+    // Only admins can access user data
+    if ($_SESSION['user_role'] !== 'admin') {
+        http_response_code(403);
+        echo json_encode(['error' => 'Admin access required']);
+        return;
+    }
+    
+    $action = $_POST['action'] ?? $_GET['action'] ?? 'list';
+    
+    switch($action) {
+        case 'list':
+            $pdo = getDBConnection();
+            if ($pdo === null) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Database connection failed']);
+                return;
+            }
+            
+            try {
+                $stmt = $pdo->query("SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC");
+                $users = $stmt->fetchAll();
+                
+                // Format the data
+                $formattedUsers = array_map(function($user) {
+                    return [
+                        'id' => $user['id'],
+                        'name' => $user['name'],
+                        'email' => $user['email'],
+                        'role' => $user['role'],
+                        'created_at' => $user['created_at'],
+                        'status' => 'Active' // All users are active by default
+                    ];
+                }, $users);
+                
+                echo json_encode(['success' => true, 'users' => $formattedUsers]);
+            } catch (PDOException $e) {
+                error_log("Error fetching users: " . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to fetch users']);
+            }
+            break;
+
+        case 'update':
+            $id = (int)($_POST['id'] ?? 0);
+            $name = trim($_POST['name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $role = $_POST['role'] ?? 'employee';
+
+            if ($id <= 0 || $name === '' || $email === '' || !in_array($role, ['employee', 'admin'], true)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid input']);
+                return;
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid email address']);
+                return;
+            }
+
+            $pdo = getDBConnection();
+            if ($pdo === null) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Database connection failed']);
+                return;
+            }
+
+            try {
+                $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?");
+                $stmt->execute([$name, $email, $role, $id]);
+                echo json_encode(['success' => true]);
+            } catch (PDOException $e) {
+                error_log("Error updating user: " . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to update user']);
+            }
+            break;
+
+        case 'delete':
+            $id = (int)($_POST['id'] ?? 0);
+
+            if ($id <= 0) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid user id']);
+                return;
+            }
+
+            // Prevent deleting yourself to avoid locking out the admin
+            if ($id === (int)($_SESSION['user_id'] ?? 0)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'You cannot delete your own account while logged in']);
+                return;
+            }
+
+            $pdo = getDBConnection();
+            if ($pdo === null) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Database connection failed']);
+                return;
+            }
+
+            try {
+                $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+                $stmt->execute([$id]);
+                echo json_encode(['success' => true]);
+            } catch (PDOException $e) {
+                error_log("Error deleting user: " . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to delete user']);
+            }
+            break;
+
+        default:
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid action']);
             break;
     }
 }
