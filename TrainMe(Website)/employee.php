@@ -17,9 +17,60 @@ $page_title = "Employee Dashboard - TrainMe";
 $user_name = $_SESSION['user_name'] ?? 'Employee';
 $user_role = $_SESSION['user_role'] ?? 'employee';
 $last_login = $_SESSION['last_login'] ?? null;
+$user_email = 'N/A';
+$account_created = null;
 
-// Get training progress
-$progress = $_SESSION['training_progress'] ?? [];
+// Load training progress from database
+$progress = [];
+if (isset($_SESSION['user_id'])) {
+    try {
+        $db_config = [
+            'host' => 'localhost',
+            'dbname' => 'trainme_db',
+            'username' => 'root',
+            'password' => 'Eyadelmo2zy69'
+        ];
+        $dsn = "mysql:host={$db_config['host']};dbname={$db_config['dbname']};charset=utf8mb4";
+        $pdo = new PDO($dsn, $db_config['username'], $db_config['password'], [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]);
+        
+        $stmt = $pdo->prepare("
+            SELECT module_key, score, completed_at 
+            FROM training_progress 
+            WHERE user_id = ? 
+            ORDER BY completed_at DESC
+        ");
+        $stmt->execute([$_SESSION['user_id']]);
+        $results = $stmt->fetchAll();
+        
+        foreach ($results as $row) {
+            $progress[$row['module_key']] = [
+                'score' => (int)$row['score'],
+                'completed_at' => $row['completed_at']
+            ];
+        }
+        
+        // Fetch user email and account creation date
+        $userStmt = $pdo->prepare("
+            SELECT email, created_at 
+            FROM users 
+            WHERE id = ?
+        ");
+        $userStmt->execute([$_SESSION['user_id']]);
+        $userData = $userStmt->fetch();
+        $user_email = $userData['email'] ?? 'N/A';
+        $account_created = $userData['created_at'] ?? null;
+        
+        // Store in session for future use
+        $_SESSION['training_progress'] = $progress;
+    } catch (PDOException $e) {
+        error_log("Error loading training progress: " . $e->getMessage());
+        // Fallback to session data if database fails
+        $progress = $_SESSION['training_progress'] ?? [];
+    }
+}
 
 // Define all available training modules
 $all_modules = [
@@ -315,36 +366,101 @@ if ($completed_modules > 0) {
         <!-- Resources Section -->
         <section id="resources" class="employee-resources">
             <div class="section-heading">
-                <h2>Helpful shortcuts</h2>
-                <p>Everything you need to stay ahead of attackers.</p>
+                <h2>Security Resources</h2>
+                <p>Essential tools, guides, and information to help you stay secure.</p>
             </div>
+            
             <div class="resource-grid">
+                <!-- Quick Actions -->
                 <article class="resource-card">
-                    <div class="resource-tag">High priority</div>
-                    <h3>Report a suspicious email</h3>
-                    <p>Forward the message to the security team so they can investigate and warn others.</p>
+                    <div class="resource-icon">🚨</div>
+                    <div class="resource-tag">URGENT</div>
+                    <h3>Report Security Incident</h3>
+                    <p>If you've clicked a suspicious link, received a phishing email, or suspect a security breach, report it immediately.</p>
                     <div class="resource-actions">
-                        <a class="link-btn" href="mailto:security@trainme.com?subject=Suspicious%20email%20report&body=Hi%20Security%20Team,%0D%0A%0D%0AI%20received%20a%20suspicious%20email.%20Details%20below:%0D%0A">
-                            Email security team →
-                        </a>
+                        <button class="link-btn" onclick="showReportModal()">Report Now →</button>
                     </div>
                 </article>
+
                 <article class="resource-card">
-                    <div class="resource-tag">Guided tips</div>
-                    <h3>Open the phishing checklist</h3>
-                    <p>Walk through a quick checklist before clicking links or opening attachments.</p>
+                    <div class="resource-icon">📋</div>
+                    <div class="resource-tag">QUICK REFERENCE</div>
+                    <h3>Phishing Detection Checklist</h3>
+                    <p>Use this interactive checklist to verify emails before clicking links or opening attachments.</p>
                     <div class="resource-actions">
-                        <button class="link-btn" onclick="window.location.href='employee_checklist.php'">View checklist →</button>
+                        <button class="link-btn" onclick="window.location.href='employee_checklist.php'">Open Checklist →</button>
                     </div>
                 </article>
+
                 <article class="resource-card">
-                    <div class="resource-tag">Need guidance?</div>
-                    <h3>Ask for help</h3>
-                    <p>Not sure about something? Reach out to security for a quick second opinion.</p>
+                    <div class="resource-icon">🔐</div>
+                    <div class="resource-tag">BEST PRACTICES</div>
+                    <h3>Password Security Guide</h3>
+                    <p>Learn how to create strong passwords, use password managers, and enable two-factor authentication.</p>
                     <div class="resource-actions">
-                        <a class="link-btn" href="mailto:security@trainme.com?subject=Security%20question">
-                            Ask a question →
-                        </a>
+                        <button class="link-btn" onclick="goToModule('password')">View Guide →</button>
+                    </div>
+                </article>
+
+                <!-- Security Tips -->
+                <article class="resource-card">
+                    <div class="resource-icon">⚠️</div>
+                    <div class="resource-tag">RED FLAGS</div>
+                    <h3>Common Phishing Indicators</h3>
+                    <p>Recognize warning signs: urgent requests, suspicious sender addresses, unexpected attachments, and requests for credentials.</p>
+                    <div class="resource-actions">
+                        <button class="link-btn" onclick="goToModule('phishing')">Learn More →</button>
+                    </div>
+                </article>
+
+                <article class="resource-card">
+                    <div class="resource-icon">💬</div>
+                    <div class="resource-tag">SUPPORT</div>
+                    <h3>Get Security Help</h3>
+                    <p>Have a security question or need clarification? Our security team is here to help you make informed decisions.</p>
+                    <div class="resource-actions">
+                        <button class="link-btn" onclick="showQuestionModal()">Contact Security →</button>
+                    </div>
+                </article>
+
+                <article class="resource-card">
+                    <div class="resource-icon">📚</div>
+                    <div class="resource-tag">TRAINING</div>
+                    <h3>Review Training Modules</h3>
+                    <p>Access all security training modules to refresh your knowledge and improve your security awareness score.</p>
+                    <div class="resource-actions">
+                        <button class="link-btn" onclick="goToTrainingPage()">View All Modules →</button>
+                    </div>
+                </article>
+
+                <!-- Data Protection -->
+                <article class="resource-card">
+                    <div class="resource-icon">🛡️</div>
+                    <div class="resource-tag">DATA PROTECTION</div>
+                    <h3>Data Handling Guidelines</h3>
+                    <p>Learn how to properly handle, store, and share company and customer data to prevent breaches.</p>
+                    <div class="resource-actions">
+                        <button class="link-btn" onclick="goToModule('data')">View Guidelines →</button>
+                    </div>
+                </article>
+
+                <article class="resource-card">
+                    <div class="resource-icon">🌐</div>
+                    <div class="resource-tag">SAFE BROWSING</div>
+                    <h3>Secure Browsing Practices</h3>
+                    <p>Protect yourself from malicious websites, popups, and downloads while browsing the internet.</p>
+                    <div class="resource-actions">
+                        <button class="link-btn" onclick="goToModule('browsing')">Learn Practices →</button>
+                    </div>
+                </article>
+
+                <article class="resource-card">
+                    <div class="resource-icon">📊</div>
+                    <div class="resource-tag">YOUR PROGRESS</div>
+                    <h3>Training Progress</h3>
+                    <p>Track your security training completion, scores, and identify areas where you need improvement.</p>
+                    <div class="resource-actions">
+                        <button class="link-btn" onclick="showEmployeeSection('overview')">View Progress →</button>
                     </div>
                 </article>
             </div>
@@ -364,6 +480,7 @@ if ($completed_modules > 0) {
                         </div>
                         <div class="profile-details">
                             <p><strong>Name:</strong> <span id="user-name"><?php echo htmlspecialchars($user_name); ?></span></p>
+                            <p><strong>Email:</strong> <span id="user-email"><?php echo htmlspecialchars($user_email); ?></span></p>
                             <p><strong>Role:</strong> <span id="user-role"><?php echo htmlspecialchars($user_role); ?></span></p>
                             <p><strong>Status:</strong> <span style="color: #059669; font-weight: 600;">Active</span></p>
                         </div>
@@ -372,6 +489,18 @@ if ($completed_modules > 0) {
                         <div class="profile-meta-row">
                             <span>User ID</span>
                             <span id="user-id"><?php echo htmlspecialchars($_SESSION['user_id']); ?></span>
+                        </div>
+                        <div class="profile-meta-row">
+                            <span>Account created</span>
+                            <span>
+                                <?php
+                                if ($account_created) {
+                                    echo date('M d, Y', strtotime($account_created));
+                                } else {
+                                    echo 'N/A';
+                                }
+                                ?>
+                            </span>
                         </div>
                         <div class="profile-meta-row">
                             <span>Last login</span>
@@ -389,11 +518,53 @@ if ($completed_modules > 0) {
                             <span>Training modules completed</span>
                             <span><?php echo $completed_modules; ?> of <?php echo $total_modules; ?></span>
                         </div>
+                        <?php if ($average_score > 0): ?>
+                        <div class="profile-meta-row">
+                            <span>Average score</span>
+                            <span style="color: <?php echo $average_score >= 90 ? '#059669' : ($average_score >= 70 ? '#d97706' : '#dc2626'); ?>; font-weight: 600;">
+                                <?php echo $average_score; ?>%
+                            </span>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+
+    <!-- Security Report Modal -->
+    <div id="reportModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeReportModal()">&times;</span>
+            <h2>Report Security Incident</h2>
+            <form id="reportForm">
+                <div class="form-group">
+                    <label for="reportDetails">Incident Details:</label>
+                    <textarea id="reportDetails" name="details" rows="6" required placeholder="Please describe the security incident in detail. Include what happened, when it occurred, and any relevant information..."></textarea>
+                </div>
+                <div id="reportMessage" style="display: none; margin: 1rem 0; padding: 1rem; border-radius: 5px;"></div>
+                <button type="submit" class="btn btn-primary">Submit Report</button>
+                <button type="button" class="btn btn-outline" onclick="closeReportModal()" style="margin-left: 1rem;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Question Modal -->
+    <div id="questionModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeQuestionModal()">&times;</span>
+            <h2>Ask Security Question</h2>
+            <form id="questionForm">
+                <div class="form-group">
+                    <label for="questionText">Your Question:</label>
+                    <textarea id="questionText" name="question" rows="6" required placeholder="Please describe your security question or concern..."></textarea>
+                </div>
+                <div id="questionMessage" style="display: none; margin: 1rem 0; padding: 1rem; border-radius: 5px;"></div>
+                <button type="submit" class="btn btn-primary">Send Question</button>
+                <button type="button" class="btn btn-outline" onclick="closeQuestionModal()" style="margin-left: 1rem;">Cancel</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         // Logout function
@@ -417,6 +588,152 @@ if ($completed_modules > 0) {
         function goToTrainingPage() {
             window.location.href = 'training.php';
         }
+
+        // Navigate to specific training module
+        function goToModule(key) {
+            if (key === 'phishing') window.location.href = 'training_phishing.php';
+            if (key === 'password') window.location.href = 'training_password.php';
+            if (key === 'data') window.location.href = 'training_data.php';
+            if (key === 'browsing') window.location.href = 'training_browsing.php';
+        }
+
+        // Show report modal
+        function showReportModal() {
+            document.getElementById('reportModal').style.display = 'flex';
+            document.getElementById('reportForm').reset();
+            document.getElementById('reportMessage').style.display = 'none';
+        }
+
+        // Close report modal
+        function closeReportModal() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        // Show question modal
+        function showQuestionModal() {
+            document.getElementById('questionModal').style.display = 'flex';
+            document.getElementById('questionForm').reset();
+            document.getElementById('questionMessage').style.display = 'none';
+        }
+
+        // Close question modal
+        function closeQuestionModal() {
+            document.getElementById('questionModal').style.display = 'none';
+        }
+
+        // Handle report form submission
+        document.getElementById('reportForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const details = document.getElementById('reportDetails').value;
+            const messageDiv = document.getElementById('reportMessage');
+
+            if (!details.trim()) {
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#fee2e2';
+                messageDiv.style.color = '#991b1b';
+                messageDiv.textContent = 'Please provide incident details.';
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'report_incident');
+                formData.append('details', details);
+
+                const response = await fetch('index.php?api=email', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageDiv.style.display = 'block';
+                    messageDiv.style.background = '#d1fae5';
+                    messageDiv.style.color = '#065f46';
+                    messageDiv.textContent = data.message || 'Report submitted successfully!';
+                    document.getElementById('reportForm').reset();
+                    
+                    setTimeout(() => {
+                        closeReportModal();
+                    }, 2000);
+                } else {
+                    messageDiv.style.display = 'block';
+                    messageDiv.style.background = '#fee2e2';
+                    messageDiv.style.color = '#991b1b';
+                    messageDiv.textContent = data.error || 'Failed to submit report. Please try again.';
+                }
+            } catch (error) {
+                console.error('Report error:', error);
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#fee2e2';
+                messageDiv.style.color = '#991b1b';
+                messageDiv.textContent = 'An error occurred. Please try again.';
+            }
+        });
+
+        // Handle question form submission
+        document.getElementById('questionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const question = document.getElementById('questionText').value;
+            const messageDiv = document.getElementById('questionMessage');
+
+            if (!question.trim()) {
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#fee2e2';
+                messageDiv.style.color = '#991b1b';
+                messageDiv.textContent = 'Please enter your question.';
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'ask_question');
+                formData.append('question', question);
+
+                const response = await fetch('index.php?api=email', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageDiv.style.display = 'block';
+                    messageDiv.style.background = '#d1fae5';
+                    messageDiv.style.color = '#065f46';
+                    messageDiv.textContent = data.message || 'Question sent successfully!';
+                    document.getElementById('questionForm').reset();
+                    
+                    setTimeout(() => {
+                        closeQuestionModal();
+                    }, 2000);
+                } else {
+                    messageDiv.style.display = 'block';
+                    messageDiv.style.background = '#fee2e2';
+                    messageDiv.style.color = '#991b1b';
+                    messageDiv.textContent = data.error || 'Failed to send question. Please try again.';
+                }
+            } catch (error) {
+                console.error('Question error:', error);
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#fee2e2';
+                messageDiv.style.color = '#991b1b';
+                messageDiv.textContent = 'An error occurred. Please try again.';
+            }
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            const reportModal = document.getElementById('reportModal');
+            const questionModal = document.getElementById('questionModal');
+            if (e.target === reportModal) {
+                closeReportModal();
+            }
+            if (e.target === questionModal) {
+                closeQuestionModal();
+            }
+        });
 
         // Simple tab-style navigation for employee sections
         function showEmployeeSection(sectionId) {

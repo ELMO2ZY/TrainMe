@@ -83,7 +83,7 @@ $page_title = "Sign In - TrainMe";
                     </div>
 
                     <div class="form-footer">
-                        <a href="#" class="forgot-password">Forget your password?</a>
+                        <a href="#" class="forgot-password" onclick="event.preventDefault(); showForgotPasswordModal();">Forget your password?</a>
                     </div>
 
                     <button type="submit" class="signin-btn">Sign IN</button>
@@ -165,7 +165,132 @@ $page_title = "Sign In - TrainMe";
                     errorMessage.style.display = 'block';
                 }
         });
+
+        // Forgot Password Modal
+        function showForgotPasswordModal() {
+            const modal = document.getElementById('forgot-password-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeForgotPasswordModal() {
+            const modal = document.getElementById('forgot-password-modal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.getElementById('forgot-password-form').reset();
+                document.getElementById('forgot-password-error').style.display = 'none';
+                document.getElementById('forgot-password-success').style.display = 'none';
+            }
+        }
+
+        async function submitForgotPassword() {
+            const email = document.getElementById('forgot-email').value.trim();
+            const role = document.querySelector('input[name="forgot-role"]:checked');
+            const errorDiv = document.getElementById('forgot-password-error');
+            const successDiv = document.getElementById('forgot-password-success');
+            const submitBtn = document.getElementById('forgot-password-submit-btn');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            if (!email || !email.includes('@')) {
+                errorDiv.textContent = 'Please enter a valid email address';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (!role) {
+                errorDiv.textContent = 'Please select your role (Employee or Admin)';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'forgot_password');
+                formData.append('email', email);
+                formData.append('role', role.value);
+                
+                const response = await fetch('index.php?api=auth', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successDiv.textContent = data.message || 'If an account with that email exists, a password reset link has been sent to your email.';
+                    successDiv.style.display = 'block';
+                    document.getElementById('forgot-password-form').reset();
+                    setTimeout(() => {
+                        closeForgotPasswordModal();
+                    }, 3000);
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to send password reset email';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Forgot password error:', error);
+                errorDiv.textContent = 'Failed to send password reset email. Please try again.';
+                errorDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        }
     </script>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);">
+        <div style="background: white; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #e5e7eb;">
+                <h3 style="margin: 0; font-size: 1.5rem; color: #0f172a; font-weight: 700;">Reset Password</h3>
+                <button onclick="closeForgotPasswordModal()" style="background: none; border: none; font-size: 1.75rem; color: #6b7280; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.background='#f3f4f6'; this.style.color='#374151'" onmouseout="this.style.background='none'; this.style.color='#6b7280'">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <p style="margin: 0 0 1.5rem 0; color: #6b7280; line-height: 1.6;">Enter your email address and role, and we'll send you a link to reset your password.</p>
+                
+                <form id="forgot-password-form" onsubmit="event.preventDefault(); submitForgotPassword();">
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="display: block; font-weight: 600; color: #374151; font-size: 0.875rem; margin-bottom: 0.5rem;">Email Address <span style="color: #dc2626;">*</span></label>
+                        <input type="email" id="forgot-email" required 
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; box-sizing: border-box; transition: all 0.2s; outline: none;"
+                               onfocus="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37, 99, 235, 0.1)'"
+                               onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'"
+                               placeholder="your.email@example.com"
+                               autocomplete="email">
+                    </div>
+                    
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="display: block; font-weight: 600; color: #374151; font-size: 0.875rem; margin-bottom: 0.5rem;">Select your role <span style="color: #dc2626;">*</span></label>
+                        <div style="display: flex; gap: 1rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="forgot-role" value="employee" required>
+                                <span>Employee</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="forgot-role" value="admin" required>
+                                <span>Admin</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="forgot-password-error" class="error-message" style="display: none; margin-bottom: 1rem;"></div>
+                    <div id="forgot-password-success" style="display: none; padding: 1rem; background: #d1fae5; border-radius: 6px; color: #065f46; margin-bottom: 1rem;"></div>
+                    
+                    <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" onclick="closeForgotPasswordModal()" style="padding: 0.75rem 1.5rem; border: 1px solid #d1d5db; border-radius: 6px; background: white; color: #374151; font-weight: 500; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">Cancel</button>
+                        <button type="submit" id="forgot-password-submit-btn" style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: #2563eb; color: white; font-weight: 500; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Send Reset Link</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

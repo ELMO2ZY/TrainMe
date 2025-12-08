@@ -241,6 +241,108 @@ $last_login = $_SESSION['last_login'] ?? null;
         </div>
     </div>
 
+    <!-- Add User Modal -->
+    <div id="add-user-modal" class="admin-modal" style="display: none;">
+        <div class="admin-modal-overlay" onclick="closeAddUserModal()"></div>
+        <div class="admin-modal-content" style="max-width: 500px; position: relative; z-index: 10001; pointer-events: auto;">
+            <div class="admin-modal-header">
+                <h3>Add New User</h3>
+                <button class="admin-modal-close" onclick="closeAddUserModal()">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <form id="add-user-form" style="display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); submitAddUser();">
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="add-user-name" style="font-weight: 600; color: #374151; font-size: 0.875rem;">Full Name <span style="color: #dc2626;">*</span></label>
+                        <input type="text" id="add-user-name" name="name" required 
+                               style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; 
+                                      transition: all 0.2s; outline: none; background: white; width: 100%; box-sizing: border-box;
+                                      pointer-events: auto; position: relative; z-index: 1;"
+                               onfocus="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37, 99, 235, 0.1)'"
+                               onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'"
+                               placeholder="Enter full name"
+                               autocomplete="name">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="add-user-email" style="font-weight: 600; color: #374151; font-size: 0.875rem;">Email Address <span style="color: #dc2626;">*</span></label>
+                        <input type="email" id="add-user-email" name="email" required 
+                               style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; 
+                                      transition: all 0.2s; outline: none; background: white; width: 100%; box-sizing: border-box;
+                                      pointer-events: auto; position: relative; z-index: 1;"
+                               onfocus="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37, 99, 235, 0.1)'"
+                               onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'"
+                               placeholder="user@example.com"
+                               autocomplete="email">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="add-user-role" style="font-weight: 600; color: #374151; font-size: 0.875rem;">Role <span style="color: #dc2626;">*</span></label>
+                        <select id="add-user-role" name="role" required 
+                                style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; 
+                                       transition: all 0.2s; outline: none; background: white; width: 100%; box-sizing: border-box;
+                                       pointer-events: auto; position: relative; z-index: 1; cursor: pointer;"
+                                onfocus="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37, 99, 235, 0.1)'"
+                                onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
+                            <option value="employee">Employee</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    <div style="background: #f3f4f6; padding: 1rem; border-radius: 6px; border-left: 3px solid #2563eb;">
+                        <p style="margin: 0; font-size: 0.875rem; color: #6b7280; line-height: 1.5;">
+                            <strong style="color: #374151;">Note:</strong> A temporary password will be automatically generated. The user will receive a welcome email with login instructions.
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeAddUserModal()">Cancel</button>
+                <button type="button" id="add-user-submit-btn" class="btn btn-primary" onclick="submitAddUser()">Create User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="admin-modal" style="display: none;">
+        <div class="admin-modal-overlay" onclick="closeEditUserModal()"></div>
+        <div class="admin-modal-content" style="max-width: 500px;">
+            <div class="admin-modal-header">
+                <h3>Edit User</h3>
+                <button class="admin-modal-close" onclick="closeEditUserModal()">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <form id="edit-user-form" style="display: flex; flex-direction: column; gap: 1.25rem;" onsubmit="event.preventDefault(); document.getElementById('edit-user-save-btn').click();">
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="edit-user-name" style="font-weight: 600; color: #374151; font-size: 0.875rem;">Name</label>
+                        <input type="text" id="edit-user-name" required 
+                               style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; 
+                                      transition: all 0.2s; outline: none;"
+                               onfocus="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37, 99, 235, 0.1)'"
+                               onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'"
+                               placeholder="Enter user name">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="edit-user-email" style="font-weight: 600; color: #374151; font-size: 0.875rem;">Email</label>
+                        <input type="email" id="edit-user-email" readonly disabled
+                               style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; 
+                                      background: #f3f4f6; color: #6b7280; cursor: not-allowed; outline: none;"
+                               placeholder="Enter email address">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="edit-user-role" style="font-weight: 600; color: #374151; font-size: 0.875rem;">Role</label>
+                        <select id="edit-user-role" disabled
+                                style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; 
+                                       background: #f3f4f6; color: #6b7280; cursor: not-allowed; outline: none;">
+                            <option value="employee">Employee</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeEditUserModal()">Cancel</button>
+                <button type="button" id="edit-user-save-btn" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global variables
         let currentUser = {
@@ -332,36 +434,123 @@ $last_login = $_SESSION['last_login'] ?? null;
                 
                 if (data.success) {
                     const campaignsList = document.getElementById('campaigns-list');
-                    campaignsList.innerHTML = '<table class="admin-table"><thead><tr><th>Campaign Name</th><th>Status</th><th>Recipients</th><th>Clicks</th><th>Reports</th><th>Actions</th></tr></thead><tbody>';
+                    
+                    if (data.campaigns.length === 0) {
+                        campaignsList.innerHTML = `
+                            <div style="text-align: center; padding: 4rem; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">📧</div>
+                                <h3 style="color: #374151; margin-bottom: 0.5rem;">No campaigns yet</h3>
+                                <p style="color: #6b7280; margin-bottom: 1.5rem;">Create your first phishing simulation campaign to get started</p>
+                                <button onclick="createCampaign()" class="btn btn-primary">+ Create Campaign</button>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    let tableHTML = `
+                        <div style="background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">
+                            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Campaign Name</th>
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Template</th>
+                                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Status</th>
+                                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Recipients</th>
+                                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Clicks</th>
+                                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Created</th>
+                                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
                     
                     data.campaigns.forEach(campaign => {
                         const statusClass = campaign.status === 'active' ? 'admin-status-active' : 
                                           campaign.status === 'completed' ? 'admin-status-completed' : 'admin-status-draft';
-                        campaignsList.innerHTML += `
-                            <tr>
-                                <td><strong>${campaign.name}</strong></td>
-                                <td><span class="admin-status-badge ${statusClass}">${campaign.status}</span></td>
-                                <td>${campaign.recipients}</td>
-                                <td>${campaign.clicks}</td>
-                                <td>${campaign.reports}</td>
-                                <td>
-                                    <button onclick="viewCampaignDetails(${campaign.id})" class="admin-action-btn">View</button>
-                                    <button onclick="sendCampaign(${campaign.id})" class="admin-action-btn primary">Send</button>
+                        const statusLabel = campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1);
+                        const templateLabel = (campaign.template || 'custom').charAt(0).toUpperCase() + (campaign.template || 'custom').slice(1);
+                        const createdDate = campaign.created_at ? new Date(campaign.created_at).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }) : '—';
+                        const campaignNameEscaped = (campaign.name || 'Unnamed Campaign').replace(/'/g, "\\'");
+                        
+                        tableHTML += `
+                            <tr style="border-bottom: 1px solid #e5e7eb; transition: background 0.2s;" 
+                                onmouseover="this.style.background='#f9fafb'" 
+                                onmouseout="this.style.background='white'">
+                                <td style="padding: 1rem;">
+                                    <div style="font-weight: 600; color: #111827; font-size: 0.95rem;">${campaign.name || 'Unnamed Campaign'}</div>
+                                </td>
+                                <td style="padding: 1rem;">
+                                    <span style="display: inline-block; padding: 0.25rem 0.75rem; background: #f3f4f6; border-radius: 6px; font-size: 0.875rem; color: #6b7280; font-weight: 500;">${templateLabel}</span>
+                                </td>
+                                <td style="padding: 1rem; text-align: center;">
+                                    <span class="admin-status-badge ${statusClass}" style="display: inline-block; padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; text-transform: capitalize;">${statusLabel}</span>
+                                </td>
+                                <td style="padding: 1rem; text-align: center; color: #374151; font-weight: 500;">${campaign.recipients || 0}</td>
+                                <td style="padding: 1rem; text-align: center; color: #374151; font-weight: 500;">${campaign.clicks || campaign.total_clicks || 0}</td>
+                                <td style="padding: 1rem; text-align: center; color: #6b7280; font-size: 0.875rem;">${createdDate}</td>
+                                <td style="padding: 1rem; text-align: center;">
+                                    <div style="display: flex; gap: 0.5rem; justify-content: center; align-items: center;">
+                                        <button onclick="viewCampaignDetails(${campaign.id})" 
+                                                style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.2s;"
+                                                onmouseover="this.style.background='#1d4ed8'; this.style.transform='translateY(-1px)'"
+                                                onmouseout="this.style.background='#2563eb'; this.style.transform='translateY(0)'">
+                                            Details
+                                        </button>
+                                        ${campaign.status === 'draft' ? `
+                                            <button onclick="sendCampaign(${campaign.id})" 
+                                                    style="padding: 0.5rem 1rem; background: #059669; color: white; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.2s;"
+                                                    onmouseover="this.style.background='#047857'; this.style.transform='translateY(-1px)'"
+                                                    onmouseout="this.style.background='#059669'; this.style.transform='translateY(0)'">
+                                                Send
+                                            </button>
+                                        ` : ''}
+                                        <button onclick="deleteCampaign(${campaign.id}, '${campaignNameEscaped}')" 
+                                                style="padding: 0.5rem 1rem; background: #dc2626; color: white; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.2s;"
+                                                onmouseover="this.style.background='#b91c1c'; this.style.transform='translateY(-1px)'"
+                                                onmouseout="this.style.background='#dc2626'; this.style.transform='translateY(0)'">
+                                            Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `;
                     });
                     
-                    campaignsList.innerHTML += '</tbody></table>';
+                    tableHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    
+                    campaignsList.innerHTML = tableHTML;
+                } else {
+                    campaignsList.innerHTML = `
+                        <div style="text-align: center; padding: 4rem; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="color: #dc2626; margin-bottom: 1rem;">⚠️</div>
+                            <h3 style="color: #374151; margin-bottom: 0.5rem;">Error loading campaigns</h3>
+                            <p style="color: #6b7280;">${data.error || 'Unknown error'}</p>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading campaigns data:', error);
+                document.getElementById('campaigns-list').innerHTML = `
+                    <div style="text-align: center; padding: 4rem; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="color: #dc2626; margin-bottom: 1rem;">⚠️</div>
+                        <h3 style="color: #374151; margin-bottom: 0.5rem;">Failed to load campaigns</h3>
+                        <p style="color: #6b7280;">Please try again later</p>
+                    </div>
+                `;
             }
         }
 
         // Campaign functions
         function createCampaign() {
-            alert('Create Campaign functionality - This would open a campaign creation form');
+            window.location.href = 'create_campaign.php';
         }
 
         function viewCampaigns() {
@@ -370,36 +559,580 @@ $last_login = $_SESSION['last_login'] ?? null;
         }
 
         function sendCampaign(campaignId) {
-            if (confirm(`Send campaign ${campaignId} to all recipients?`)) {
-                alert(`Campaign ${campaignId} sent successfully!`);
-                loadCampaignsData();
+            showAdminModal(
+                'Send Campaign',
+                'Are you sure you want to send this campaign to all recipients?',
+                async () => {
+                    try {
+                        const formData = new FormData();
+                        formData.append('action', 'send');
+                        formData.append('campaign_id', campaignId);
+                        
+                        const response = await fetch('index.php?api=campaigns', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const data = await response.json();
+                        closeAdminModal();
+                        
+                        if (data.success) {
+                            showAdminModal('Success', `Campaign sent successfully to ${data.sent || 0} recipients!`, null, 'success');
+                            setTimeout(() => {
+                                closeAdminModal();
+                                loadCampaignsData();
+                            }, 1500);
+                        } else {
+                            showAdminModal('Error', 'Failed to send campaign: ' + (data.error || 'Unknown error'), null, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error sending campaign:', error);
+                        closeAdminModal();
+                        showAdminModal('Error', 'Failed to send campaign. Please try again.', null, 'error');
+                    }
+                }
+            );
+        }
+
+        async function viewCampaignDetails(campaignId) {
+            try {
+                const response = await fetch(`index.php?api=campaigns&action=details&id=${campaignId}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showAdminModal('Error', data.error || 'Failed to load campaign details', null, 'error');
+                    return;
+                }
+                
+                const campaign = data.campaign;
+                const recipients = data.recipients || [];
+                const clicks = data.clicks || [];
+                const statusCounts = data.status_counts || {};
+                
+                // Debug: Log the data we received
+                console.log('=== CAMPAIGN DETAILS DEBUG ===');
+                console.log('Clicks received:', clicks);
+                console.log('Clicks length:', clicks.length);
+                console.log('First click:', clicks[0]);
+                
+                // Format created date
+                const createdDate = new Date(campaign.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Build HTML content
+                let html = `
+                    <div style="max-width: 1000px; margin: 0 auto;">
+                        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0 0 1rem 0; color: #111827; font-size: 1.25rem;">Campaign Information</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <p style="margin: 0.5rem 0; color: #6b7280; font-size: 0.875rem;"><strong>Name:</strong> ${campaign.name || 'N/A'}</p>
+                                    <p style="margin: 0.5rem 0; color: #6b7280; font-size: 0.875rem;"><strong>Template:</strong> ${campaign.template || 'Custom'}</p>
+                                    <p style="margin: 0.5rem 0; color: #6b7280; font-size: 0.875rem;"><strong>Status:</strong> 
+                                        <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; 
+                                            background: ${campaign.status === 'active' ? '#d1fae5' : campaign.status === 'completed' ? '#dbeafe' : '#f3f4f6'}; 
+                                            color: ${campaign.status === 'active' ? '#065f46' : campaign.status === 'completed' ? '#1e40af' : '#374151'};">
+                                            ${campaign.status || 'draft'}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <p style="margin: 0.5rem 0; color: #6b7280; font-size: 0.875rem;"><strong>Subject:</strong> ${campaign.subject || 'N/A'}</p>
+                                    <p style="margin: 0.5rem 0; color: #6b7280; font-size: 0.875rem;"><strong>Created:</strong> ${createdDate}</p>
+                                    <p style="margin: 0.5rem 0; color: #6b7280; font-size: 0.875rem;"><strong>Created by:</strong> ${campaign.created_by_name || 'Unknown'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0 0 1rem 0; color: #111827; font-size: 1.25rem;">Statistics</h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                                <div style="text-align: center;">
+                                    <p style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #2563eb;">${data.recipient_count || 0}</p>
+                                    <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #6b7280;">Total Recipients</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <p style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #059669;">${statusCounts.sent || 0}</p>
+                                    <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #6b7280;">Sent</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <p style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #d97706;">${data.click_count || clicks.length || 0}</p>
+                                    <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: #6b7280;">Clicks</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0 0 1.5rem 0; color: #111827; font-size: 1.25rem; font-weight: 600;">Who Clicked (${clicks.length})</h3>
+                `;
+                
+                if (!clicks || clicks.length === 0) {
+                    html += `<div style="text-align: center; color: #6b7280; padding: 3rem;">No clicks recorded yet</div>`;
+                } else {
+                    console.log('Building table for', clicks.length, 'clicks');
+                    
+                    // Build table rows array first
+                    const tableRowsArray = [];
+                    
+                    clicks.forEach((click, index) => {
+                        console.log(`Processing click ${index}:`, click);
+                        const name = (click.user_name || click.recipient_name || click.name || 'Unknown').trim();
+                        const email = (click.email || click.user_email || 'N/A').trim();
+                        const ipAddress = (click.ip_address || click.ip || 'N/A').trim();
+                        
+                        console.log(`Click ${index} - Name: ${name}, Email: ${email}, IP: ${ipAddress}`);
+                        
+                        // Format date
+                        let clickedDate = 'N/A';
+                        const dateField = click.clicked_at || click.created_at || click.action_timestamp;
+                        if (dateField) {
+                            try {
+                                const dateObj = new Date(dateField);
+                                if (!isNaN(dateObj.getTime())) {
+                                    clickedDate = dateObj.toLocaleString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
+                                }
+                            } catch (e) {
+                                clickedDate = String(dateField);
+                            }
+                        }
+                        
+                        // Get device info
+                        let deviceInfo = 'Unknown';
+                        if (click.user_agent) {
+                            const ua = String(click.user_agent);
+                            if (ua.includes('Chrome') && !ua.includes('Edg')) deviceInfo = 'Chrome';
+                            else if (ua.includes('Firefox')) deviceInfo = 'Firefox';
+                            else if (ua.includes('Safari') && !ua.includes('Chrome')) deviceInfo = 'Safari';
+                            else if (ua.includes('Edg')) deviceInfo = 'Edge';
+                            else if (ua.includes('Mobile')) deviceInfo = 'Mobile';
+                        }
+                        
+                        tableRowsArray.push({
+                            name: name,
+                            email: email,
+                            ipAddress: ipAddress,
+                            clickedDate: clickedDate,
+                            deviceInfo: deviceInfo
+                        });
+                    });
+                    
+                    // Build table HTML from array
+                    let tableRowsHTML = '';
+                    tableRowsArray.forEach(row => {
+                        tableRowsHTML += `
+                            <tr>
+                                <td style="padding: 1rem; border-bottom: 1px solid #e5e7eb; font-weight: 500; color: #111827;">${row.name}</td>
+                                <td style="padding: 1rem; border-bottom: 1px solid #e5e7eb; color: #6b7280;">${row.email}</td>
+                                <td style="padding: 1rem; border-bottom: 1px solid #e5e7eb; text-align: center; font-family: monospace; color: #6b7280;">${row.ipAddress}</td>
+                                <td style="padding: 1rem; border-bottom: 1px solid #e5e7eb; text-align: center; color: #6b7280;">${row.clickedDate}</td>
+                                <td style="padding: 1rem; border-bottom: 1px solid #e5e7eb; color: #6b7280;">${row.deviceInfo}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    console.log('Table rows HTML length:', tableRowsHTML.length);
+                    console.log('Table rows preview:', tableRowsHTML.substring(0, 300));
+                    
+                    html += `
+                            <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 4px; background: white;">
+                                <table style="width: 100%; border-collapse: collapse; background: white; min-width: 800px;">
+                                    <thead>
+                                        <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem; white-space: nowrap;">Name</th>
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem; white-space: nowrap;">Email</th>
+                                            <th style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; font-size: 0.875rem; white-space: nowrap;">IP Address</th>
+                                            <th style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; font-size: 0.875rem; white-space: nowrap;">Clicked At</th>
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.875rem; white-space: nowrap;">Device</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="background: white;">
+                                        ${tableRowsHTML}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                    
+                    console.log('Final HTML contains table:', html.includes('<table'));
+                    console.log('Final HTML contains tbody:', html.includes('<tbody>'));
+                    console.log('Final HTML contains first name:', html.includes(tableRowsArray[0]?.name || ''));
+                }
+                
+                html += `
+                        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin: 0 0 1rem 0; color: #111827; font-size: 1.25rem;">All Recipients (${recipients.length})</h3>
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="background: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
+                                            <th style="padding: 0.75rem; text-align: left; font-size: 0.875rem; font-weight: 600; color: #374151;">Email</th>
+                                            <th style="padding: 0.75rem; text-align: left; font-size: 0.875rem; font-weight: 600; color: #374151;">Name</th>
+                                            <th style="padding: 0.75rem; text-align: center; font-size: 0.875rem; font-weight: 600; color: #374151;">Status</th>
+                                            <th style="padding: 0.75rem; text-align: center; font-size: 0.875rem; font-weight: 600; color: #374151;">Sent At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                `;
+                
+                if (recipients.length === 0) {
+                    html += `<tr><td colspan="4" style="padding: 2rem; text-align: center; color: #6b7280;">No recipients found</td></tr>`;
+                } else {
+                    recipients.forEach(recipient => {
+                        const status = recipient.status || 'pending';
+                        const statusColors = {
+                            'sent': { bg: '#d1fae5', text: '#065f46' },
+                            'clicked': { bg: '#dbeafe', text: '#1e40af' },
+                            'reported': { bg: '#fee2e2', text: '#991b1b' },
+                            'failed': { bg: '#f3f4f6', text: '#6b7280' },
+                            'pending': { bg: '#fef3c7', text: '#92400e' }
+                        };
+                        const statusStyle = statusColors[status] || statusColors['pending'];
+                        const sentDate = recipient.sent_at ? new Date(recipient.sent_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) : 'N/A';
+                        
+                        html += `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem; font-size: 0.875rem; color: #111827;">${recipient.email || 'N/A'}</td>
+                                <td style="padding: 0.75rem; font-size: 0.875rem; color: #6b7280;">${recipient.recipient_name || recipient.user_name || 'N/A'}</td>
+                                <td style="padding: 0.75rem; text-align: center;">
+                                    <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; 
+                                        background: ${statusStyle.bg}; color: ${statusStyle.text};">
+                                        ${status}
+                                    </span>
+                                </td>
+                                <td style="padding: 0.75rem; text-align: center; font-size: 0.875rem; color: #6b7280;">${sentDate}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Debug: Log final HTML
+                console.log('Final HTML length:', html.length);
+                console.log('HTML contains table:', html.includes('<table'));
+                console.log('HTML contains tbody:', html.includes('<tbody>'));
+                
+                // Show modal with wider width for details view
+                const modal = document.getElementById('admin-modal');
+                const modalTitle = document.getElementById('modal-title');
+                const modalMessage = document.getElementById('modal-message');
+                const modalContent = modal.querySelector('.admin-modal-content');
+                const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+                const modalCancelBtn = document.getElementById('modal-cancel-btn');
+                
+                modalTitle.textContent = 'Campaign Details';
+                modalMessage.innerHTML = html;
+                
+                // Make modal wider for details view
+                if (modalContent) {
+                    modalContent.style.maxWidth = '1000px';
+                    modalContent.style.width = '95%';
+                }
+                
+                // Make modal body scrollable
+                const modalBody = modal.querySelector('.admin-modal-body');
+                if (modalBody) {
+                    modalBody.style.maxHeight = '85vh';
+                    modalBody.style.overflowY = 'auto';
+                    modalBody.style.padding = '1.5rem';
+                }
+                
+                // Set button styles
+                modalConfirmBtn.className = 'btn btn-primary';
+                modalConfirmBtn.textContent = 'Close';
+                modalConfirmBtn.onclick = () => {
+                    closeAdminModal();
+                };
+                modalCancelBtn.style.display = 'none';
+                
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                console.error('Error loading campaign details:', error);
+                showAdminModal('Error', 'Failed to load campaign details. Please try again.', null, 'error');
             }
         }
 
-        function viewCampaignDetails(campaignId) {
-            alert(`Viewing detailed analytics for campaign ${campaignId}`);
+        function deleteCampaign(campaignId, campaignName) {
+            showAdminModal(
+                'Delete Campaign',
+                `Are you sure you want to delete <strong>"${campaignName}"</strong>? This action cannot be undone and will delete all associated data.`,
+                async () => {
+                    try {
+                        const formData = new FormData();
+                        formData.append('action', 'delete');
+                        formData.append('campaign_id', campaignId);
+                        
+                        const response = await fetch('index.php?api=campaigns', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const data = await response.json();
+                        closeAdminModal();
+                        
+                        if (data.success) {
+                            showAdminModal('Success', 'Campaign deleted successfully!', null, 'success');
+                            setTimeout(() => {
+                                closeAdminModal();
+                                loadCampaignsData();
+                            }, 1500);
+                        } else {
+                            showAdminModal('Error', 'Failed to delete campaign: ' + (data.error || 'Unknown error'), null, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting campaign:', error);
+                        closeAdminModal();
+                        showAdminModal('Error', 'Failed to delete campaign. Please try again.', null, 'error');
+                    }
+                },
+                'danger'
+            );
         }
 
-        function exportReport(format) {
-            alert(`Exporting report as ${format.toUpperCase()}...`);
+        async function exportReport(format) {
+            try {
+                // Fetch the latest analytics data
+                const statsResponse = await fetch('index.php?api=campaigns&action=stats');
+                const statsData = await statsResponse.json();
+                
+                if (!statsData.success) {
+                    alert('Failed to fetch data for export. Please try again.');
+                    return;
+                }
+                
+                const stats = statsData.stats;
+                const trainingStats = stats.training_stats || {};
+                const moduleCompletions = trainingStats.module_completions || {};
+                const moduleNames = {
+                    'phishing': 'Phishing Awareness',
+                    'password': 'Password Security',
+                    'data': 'Data Protection',
+                    'browsing': 'Safe Browsing'
+                };
+                
+                if (format === 'csv') {
+                    // Generate CSV content
+                    let csvContent = 'TrainMe Security Training Report\n';
+                    csvContent += `Generated: ${new Date().toLocaleString()}\n\n`;
+                    
+                    // Overall Statistics
+                    csvContent += 'Overall Statistics\n';
+                    csvContent += `Total Users,${stats.total_users}\n`;
+                    csvContent += `Total Campaigns,${stats.total_campaigns}\n`;
+                    csvContent += `Active Campaigns,${stats.active_campaigns}\n`;
+                    csvContent += `Total Recipients,${stats.total_recipients}\n`;
+                    csvContent += `Click Rate,${stats.click_rate}%\n`;
+                    csvContent += `Report Rate,${stats.report_rate}%\n`;
+                    csvContent += `Success Rate,${stats.success_rate}%\n`;
+                    csvContent += `Total Completions,${trainingStats.total_completions || 0}\n`;
+                    csvContent += `Average Score,${trainingStats.average_score || 0}%\n`;
+                    csvContent += `Users Completed All Modules,${trainingStats.users_with_all_modules || 0}\n\n`;
+                    
+                    // Module Statistics
+                    csvContent += 'Module Statistics\n';
+                    csvContent += 'Module,Completions,Completion Rate\n';
+                    Object.entries(moduleCompletions).forEach(([key, count]) => {
+                        const moduleName = moduleNames[key] || key;
+                        const completionRate = stats.total_users > 0 ? Math.round((count / stats.total_users) * 100) : 0;
+                        csvContent += `${moduleName},${count},${completionRate}%\n`;
+                    });
+                    
+                    // Add all modules even if they have 0 completions
+                    ['phishing', 'password', 'data', 'browsing'].forEach(key => {
+                        if (!moduleCompletions.hasOwnProperty(key)) {
+                            const moduleName = moduleNames[key] || key;
+                            csvContent += `${moduleName},0,0%\n`;
+                        }
+                    });
+                    
+                    // Download CSV
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `trainme-report-${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                } else if (format === 'pdf') {
+                    // For PDF, we'll create a simple HTML-based PDF using window.print()
+                    // or we can use a library. For now, let's create a printable report
+                    const printWindow = window.open('', '_blank');
+                    const reportDate = new Date().toLocaleString();
+                    
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>TrainMe Security Training Report</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; padding: 20px; }
+                                h1 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+                                h2 { color: #374151; margin-top: 30px; }
+                                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                                th, td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
+                                th { background-color: #f3f4f6; font-weight: 600; }
+                                .stat-box { display: inline-block; margin: 10px; padding: 15px; background: #f3f4f6; border-radius: 8px; min-width: 150px; }
+                                .stat-value { font-size: 24px; font-weight: 700; color: #2563eb; }
+                                .stat-label { color: #6b7280; font-size: 14px; margin-top: 5px; }
+                                @media print {
+                                    body { padding: 0; }
+                                    button { display: none; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>TrainMe Security Training Report</h1>
+                            <p><strong>Generated:</strong> ${reportDate}</p>
+                            
+                            <h2>Overall Statistics</h2>
+                            <div>
+                                <div class="stat-box">
+                                    <div class="stat-value">${stats.total_users}</div>
+                                    <div class="stat-label">Total Users</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">${stats.total_campaigns}</div>
+                                    <div class="stat-label">Total Campaigns</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">${stats.success_rate}%</div>
+                                    <div class="stat-label">Success Rate</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">${trainingStats.total_completions || 0}</div>
+                                    <div class="stat-label">Total Completions</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">${trainingStats.average_score || 0}%</div>
+                                    <div class="stat-label">Average Score</div>
+                                </div>
+                            </div>
+                            
+                            <h2>Training Module Statistics</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Module</th>
+                                        <th>Completions</th>
+                                        <th>Completion Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Object.entries(moduleCompletions).map(([key, count]) => {
+                                        const moduleName = moduleNames[key] || key;
+                                        const completionRate = stats.total_users > 0 ? Math.round((count / stats.total_users) * 100) : 0;
+                                        return `<tr><td>${moduleName}</td><td>${count}</td><td>${completionRate}%</td></tr>`;
+                                    }).join('')}
+                                    ${['phishing', 'password', 'data', 'browsing'].filter(key => !moduleCompletions.hasOwnProperty(key)).map(key => {
+                                        const moduleName = moduleNames[key] || key;
+                                        return `<tr><td>${moduleName}</td><td>0</td><td>0%</td></tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                            
+                            <h2>Performance Metrics</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Value</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Click Rate</td><td>${stats.click_rate}%</td><td>Users needing training</td></tr>
+                                    <tr><td>Report Rate</td><td>${stats.report_rate}%</td><td>Users engaged</td></tr>
+                                    <tr><td>Success Rate</td><td>${stats.success_rate}%</td><td>Completion progress</td></tr>
+                                </tbody>
+                            </table>
+                            
+                            <button onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer;">Print / Save as PDF</button>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    
+                    // Wait for content to load, then trigger print
+                    setTimeout(() => {
+                        printWindow.print();
+                    }, 250);
+                }
+            } catch (error) {
+                console.error('Error exporting report:', error);
+                alert('Failed to export report. Please try again.');
+            }
         }
 
         function addUser() {
-            const name = prompt('Enter name for new user:');
-            if (!name) return;
-            const email = prompt('Enter email for new user:');
-            if (!email) return;
-            const role = prompt("Enter role for new user ('employee' or 'admin'):", 'employee');
-            if (!role || (role !== 'employee' && role !== 'admin')) {
-                showAdminModal('Error', 'Invalid role. Please use "employee" or "admin".', null, 'error');
+            // Reset form
+            document.getElementById('add-user-form').reset();
+            // Show modal
+            document.getElementById('add-user-modal').style.display = 'flex';
+        }
+
+        function closeAddUserModal() {
+            document.getElementById('add-user-modal').style.display = 'none';
+            document.getElementById('add-user-form').reset();
+        }
+
+        function submitAddUser() {
+            const name = document.getElementById('add-user-name').value.trim();
+            const email = document.getElementById('add-user-email').value.trim();
+            const role = document.getElementById('add-user-role').value;
+
+            // Validation
+            if (!name || name.length < 2) {
+                showAdminModal('Error', 'Please enter a valid name (at least 2 characters).', null, 'error');
                 return;
             }
+
+            if (!email || !email.includes('@')) {
+                showAdminModal('Error', 'Please enter a valid email address.', null, 'error');
+                return;
+            }
+
+            if (role !== 'employee' && role !== 'admin') {
+                showAdminModal('Error', 'Please select a valid role.', null, 'error');
+                return;
+            }
+
+            // Disable submit button
+            const submitBtn = document.getElementById('add-user-submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
 
             const formData = new FormData();
             formData.append('action', 'register');
             formData.append('name', name);
             formData.append('email', email);
-            formData.append('password', 'Temp1234'); // Temporary password; in real app you would send a proper invite
+            formData.append('password', 'Temp1234'); // Temporary password; user will receive email
             formData.append('role', role);
 
             fetch('index.php?api=auth', {
@@ -409,18 +1142,34 @@ $last_login = $_SESSION['last_login'] ?? null;
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showAdminModal('Success', `User created successfully!<br><small style="color: #6b7280;">Temporary password: Temp1234</small>`, null, 'success');
+                    closeAddUserModal();
+                    const emailStatus = data.email_sent ? 
+                        '<p style="margin: 0.75rem 0 0 0; font-size: 0.875rem; color: #059669;">✓ Welcome email sent successfully with login credentials.</p>' :
+                        '<p style="margin: 0.75rem 0 0 0; font-size: 0.875rem; color: #dc2626;">⚠ Welcome email could not be sent. Please share credentials manually.</p>';
+                    
+                    showAdminModal('Success', 
+                        `User created successfully!<br><br>
+                        <div style="background: #f3f4f6; padding: 1rem; border-radius: 6px; margin-top: 0.5rem;">
+                            <p style="margin: 0; font-size: 0.875rem; color: #374151;"><strong>Email:</strong> ${email}</p>
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #374151;"><strong>Temporary Password:</strong> <code style="background: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-family: monospace;">Temp1234</code></p>
+                            ${emailStatus}
+                        </div>`, 
+                        null, 'success');
                     setTimeout(() => {
                         closeAdminModal();
                         loadUsersData();
-                    }, 2000);
+                    }, 4000);
                 } else {
                     showAdminModal('Error', 'Failed to create user: ' + (data.error || 'Unknown error'), null, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
                 }
             })
             .catch(error => {
                 console.error('Error creating user:', error);
                 showAdminModal('Error', 'Failed to create user. Please try again.', null, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             });
         }
 
@@ -489,7 +1238,8 @@ $last_login = $_SESSION['last_login'] ?? null;
                                     <td class="col-created">${createdDate}</td>
                                     <td class="col-actions">
                                         <div class="admin-users-actions">
-                                            <button onclick="editUser(${user.id})" class="admin-action-btn">Edit</button>
+                                            <button onclick="viewUserTraining(${user.id}, '${userNameEscaped}')" class="admin-action-btn" style="background: #2563eb; color: white;">View Results</button>
+                                            <button onclick="editUser(${user.id})" class="admin-action-btn">Edit Name</button>
                                             ${user.role !== 'admin' ? `<button onclick="deleteUser(${user.id}, '${userNameEscaped}')" class="admin-action-btn admin-action-danger">Delete</button>` : ''}
                                         </div>
                                     </td>
@@ -522,47 +1272,69 @@ $last_login = $_SESSION['last_login'] ?? null;
             const currentEmail = row.getAttribute('data-user-email') || '';
             const currentRole = row.getAttribute('data-user-role') || 'employee';
 
-            const newName = prompt('Edit name:', currentName);
-            if (newName === null) return;
+            // Populate form fields
+            document.getElementById('edit-user-name').value = currentName;
+            document.getElementById('edit-user-email').value = currentEmail;
+            document.getElementById('edit-user-role').value = currentRole;
 
-            const newEmail = prompt('Edit email:', currentEmail);
-            if (newEmail === null) return;
+            // Show modal
+            const modal = document.getElementById('edit-user-modal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
 
-            const newRole = prompt("Edit role ('employee' or 'admin'):", currentRole);
-            if (newRole === null) return;
+            // Set up save button handler
+            const saveBtn = document.getElementById('edit-user-save-btn');
+            saveBtn.onclick = () => {
+                const newName = document.getElementById('edit-user-name').value.trim();
+                const currentEmail = document.getElementById('edit-user-email').value.trim();
+                const currentRole = document.getElementById('edit-user-role').value;
 
-            if (newRole !== 'employee' && newRole !== 'admin') {
-                alert('Invalid role. Please use \"employee\" or \"admin\".');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('action', 'update');
-            formData.append('id', userId);
-            formData.append('name', newName.trim());
-            formData.append('email', newEmail.trim());
-            formData.append('role', newRole);
-
-            fetch('index.php?api=users', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showAdminModal('Success', 'User updated successfully.', null, 'success');
-                    setTimeout(() => {
-                        closeAdminModal();
-                        loadUsersData();
-                    }, 1500);
-                } else {
-                    showAdminModal('Error', 'Failed to update user: ' + (data.error || 'Unknown error'), null, 'error');
+                // Validation
+                if (!newName) {
+                    showAdminModal('Error', 'Name is required.', null, 'error');
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Error updating user:', error);
-                showAdminModal('Error', 'Failed to update user. Please try again.', null, 'error');
-            });
+
+                // Close edit modal
+                closeEditUserModal();
+
+                // Update user (email and role are read-only, so we send the current values)
+                const formData = new FormData();
+                formData.append('action', 'update');
+                formData.append('id', userId);
+                formData.append('name', newName);
+                formData.append('email', currentEmail);
+                formData.append('role', currentRole);
+
+                fetch('index.php?api=users', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAdminModal('Success', 'User updated successfully.', null, 'success');
+                        setTimeout(() => {
+                            closeAdminModal();
+                            loadUsersData();
+                        }, 1500);
+                    } else {
+                        showAdminModal('Error', 'Failed to update user: ' + (data.error || 'Unknown error'), null, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating user:', error);
+                    showAdminModal('Error', 'Failed to update user. Please try again.', null, 'error');
+                });
+            };
+        }
+
+        function closeEditUserModal() {
+            const modal = document.getElementById('edit-user-modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            // Reset form
+            document.getElementById('edit-user-form').reset();
         }
 
         function deleteUser(userId, userName) {
@@ -843,6 +1615,249 @@ $last_login = $_SESSION['last_login'] ?? null;
             } catch (error) {
                 console.error('Error loading analytics data:', error);
             }
+        }
+
+        // View individual user training results
+        async function viewUserTraining(userId, userName) {
+            try {
+                const response = await fetch(`index.php?api=users&action=training&user_id=${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const user = data.user;
+                    const training = data.training;
+                    const progress = training.progress;
+                    const stats = training.statistics;
+                    
+                    // Create modal content with training results
+                    const moduleNames = {
+                        'phishing': 'Phishing Awareness',
+                        'password': 'Password Security',
+                        'data': 'Data Protection',
+                        'browsing': 'Safe Browsing'
+                    };
+                    
+                    let progressHTML = '';
+                    if (progress.length > 0) {
+                        progress.forEach(module => {
+                            const scoreColor = module.score >= 80 ? '#059669' : module.score >= 60 ? '#f59e0b' : '#dc2626';
+                            progressHTML += `
+                                <div style="margin-bottom: 1rem; padding: 1rem; background: #f3f4f6; border-radius: 8px; border-left: 4px solid ${scoreColor};">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <div style="font-weight: 600; font-size: 1.1rem;">${module.module_name}</div>
+                                        <div style="font-weight: 700; font-size: 1.2rem; color: ${scoreColor};">${module.score}%</div>
+                                    </div>
+                                    <div style="color: #6b7280; font-size: 0.875rem;">
+                                        Completed: ${new Date(module.completed_at).toLocaleDateString('en-US', { 
+                                            year: 'numeric', 
+                                            month: 'short', 
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        progressHTML = '<div style="text-align: center; color: #9ca3af; padding: 2rem;">No training completed yet</div>';
+                    }
+                    
+                    // Show all modules, marking incomplete ones
+                    const allModules = ['phishing', 'password', 'data', 'browsing'];
+                    const completedModules = progress.map(p => p.module_key);
+                    const incompleteModules = allModules.filter(m => !completedModules.includes(m));
+                    
+                    incompleteModules.forEach(moduleKey => {
+                        progressHTML += `
+                            <div style="margin-bottom: 1rem; padding: 1rem; background: #f9fafb; border-radius: 8px; border-left: 4px solid #d1d5db;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="font-weight: 600; color: #9ca3af;">${moduleNames[moduleKey]}</div>
+                                    <div style="color: #9ca3af;">Not Started</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    const modalContent = `
+                        <div style="max-height: 60vh; overflow-y: auto;">
+                            <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e7eb;">
+                                <h3 style="margin: 0 0 0.5rem 0; color: #2563eb;">${user.name}</h3>
+                                <div style="color: #6b7280; font-size: 0.875rem;">
+                                    <div>Email: ${user.email}</div>
+                                    <div>Role: ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                                <div style="text-align: center; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #2563eb;">${stats.completed_modules}</div>
+                                    <div style="color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem;">Completed</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">${stats.completion_rate}%</div>
+                                    <div style="color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem;">Completion Rate</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #7c3aed;">${stats.average_score}%</div>
+                                    <div style="color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem;">Average Score</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #374151;">${stats.total_modules}</div>
+                                    <div style="color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem;">Total Modules</div>
+                                </div>
+                            </div>
+                            
+                            <h4 style="margin-bottom: 1rem; color: #374151;">Training Progress</h4>
+                            ${progressHTML}
+                        </div>
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #e5e7eb; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button onclick="printUserReport(${userId}, '${userName.replace(/'/g, "\\'")}')" class="btn btn-primary" style="background: #2563eb;">Print Report</button>
+                        </div>
+                    `;
+                    
+                    showAdminModal(
+                        `Training Results - ${userName}`,
+                        modalContent,
+                        null,
+                        'default'
+                    );
+                } else {
+                    showAdminModal('Error', 'Failed to load training results: ' + (data.error || 'Unknown error'), null, 'error');
+                }
+            } catch (error) {
+                console.error('Error loading user training:', error);
+                showAdminModal('Error', 'Failed to load training results. Please try again.', null, 'error');
+            }
+        }
+
+        // Print individual user report
+        function printUserReport(userId, userName) {
+            // Fetch the data again to ensure we have the latest
+            fetch(`index.php?api=users&action=training&user_id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const user = data.user;
+                        const training = data.training;
+                        const progress = training.progress;
+                        const stats = training.statistics;
+                        
+                        const moduleNames = {
+                            'phishing': 'Phishing Awareness',
+                            'password': 'Password Security',
+                            'data': 'Data Protection',
+                            'browsing': 'Safe Browsing'
+                        };
+                        
+                        const printWindow = window.open('', '_blank');
+                        const reportDate = new Date().toLocaleString();
+                        
+                        let progressTable = '';
+                        if (progress.length > 0) {
+                            progressTable = '<table style="width: 100%; border-collapse: collapse; margin: 20px 0;"><thead><tr><th style="border: 1px solid #e5e7eb; padding: 12px; background: #f3f4f6;">Module</th><th style="border: 1px solid #e5e7eb; padding: 12px; background: #f3f4f6;">Score</th><th style="border: 1px solid #e5e7eb; padding: 12px; background: #f3f4f6;">Completed Date</th></tr></thead><tbody>';
+                            
+                            progress.forEach(module => {
+                                progressTable += `
+                                    <tr>
+                                        <td style="border: 1px solid #e5e7eb; padding: 12px;">${module.module_name}</td>
+                                        <td style="border: 1px solid #e5e7eb; padding: 12px; font-weight: 600; color: ${module.score >= 80 ? '#059669' : module.score >= 60 ? '#f59e0b' : '#dc2626'};">${module.score}%</td>
+                                        <td style="border: 1px solid #e5e7eb; padding: 12px;">${new Date(module.completed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                                    </tr>
+                                `;
+                            });
+                            
+                            // Add incomplete modules
+                            const allModules = ['phishing', 'password', 'data', 'browsing'];
+                            const completedModules = progress.map(p => p.module_key);
+                            allModules.filter(m => !completedModules.includes(m)).forEach(moduleKey => {
+                                progressTable += `
+                                    <tr style="color: #9ca3af;">
+                                        <td style="border: 1px solid #e5e7eb; padding: 12px;">${moduleNames[moduleKey]}</td>
+                                        <td style="border: 1px solid #e5e7eb; padding: 12px;">Not Started</td>
+                                        <td style="border: 1px solid #e5e7eb; padding: 12px;">—</td>
+                                    </tr>
+                                `;
+                            });
+                            
+                            progressTable += '</tbody></table>';
+                        } else {
+                            progressTable = '<p style="color: #9ca3af; text-align: center; padding: 2rem;">No training completed yet</p>';
+                        }
+                        
+                        printWindow.document.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>Training Report - ${user.name}</title>
+                                <style>
+                                    body { font-family: Arial, sans-serif; padding: 20px; }
+                                    h1 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+                                    h2 { color: #374151; margin-top: 30px; }
+                                    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                                    th, td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
+                                    th { background-color: #f3f4f6; font-weight: 600; }
+                                    .stat-box { display: inline-block; margin: 10px; padding: 15px; background: #f3f4f6; border-radius: 8px; min-width: 150px; }
+                                    .stat-value { font-size: 24px; font-weight: 700; color: #2563eb; }
+                                    .stat-label { color: #6b7280; font-size: 14px; margin-top: 5px; }
+                                    @media print {
+                                        body { padding: 0; }
+                                        button { display: none; }
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <h1>Training Report - ${user.name}</h1>
+                                <p><strong>Generated:</strong> ${reportDate}</p>
+                                
+                                <h2>User Information</h2>
+                                <table>
+                                    <tr><th style="width: 150px;">Name</th><td>${user.name}</td></tr>
+                                    <tr><th>Email</th><td>${user.email}</td></tr>
+                                    <tr><th>Role</th><td>${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</td></tr>
+                                    <tr><th>Account Created</th><td>${new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td></tr>
+                                </table>
+                                
+                                <h2>Training Statistics</h2>
+                                <div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">${stats.completed_modules}</div>
+                                        <div class="stat-label">Completed Modules</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">${stats.completion_rate}%</div>
+                                        <div class="stat-label">Completion Rate</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">${stats.average_score}%</div>
+                                        <div class="stat-label">Average Score</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">${stats.total_modules}</div>
+                                        <div class="stat-label">Total Modules</div>
+                                    </div>
+                                </div>
+                                
+                                <h2>Training Progress</h2>
+                                ${progressTable}
+                                
+                                <button onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer;">Print / Save as PDF</button>
+                            </body>
+                            </html>
+                        `);
+                        printWindow.document.close();
+                        
+                        setTimeout(() => {
+                            printWindow.print();
+                        }, 250);
+                    } else {
+                        alert('Failed to load training data for printing');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading training data:', error);
+                    alert('Failed to load training data for printing');
+                });
         }
 
         // Setup event listeners

@@ -176,6 +176,12 @@ $page_title = "Sign Up - TrainMe";
                     body: formData
                 });
 
+                // Check if response is OK and is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Invalid response format from server');
+                }
+
                 const data = await response.json();
                 
                 if (data.success) {
@@ -199,7 +205,7 @@ $page_title = "Sign Up - TrainMe";
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                errorMessage.textContent = 'Registration failed. Please try again.';
+                errorMessage.textContent = 'Registration failed. Please try again. ' + (error.message || '');
                 errorMessage.style.display = 'block';
             }
         });

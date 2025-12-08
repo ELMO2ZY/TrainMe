@@ -1,9 +1,21 @@
 <?php
+// Suppress errors from being displayed (they'll still be logged)
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
+}
+
+// Include email helper (suppress errors)
+try {
+    require_once __DIR__ . '/email_helper.php';
+} catch (Throwable $e) {
+    error_log("Email helper include error: " . $e->getMessage());
 }
 
 $page_title = "Data Protection Training - TrainMe";
@@ -64,6 +76,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'user_id' => $_SESSION['user_id'],
                 'score' => $score
             ]);
+            
+            // Send test results email
+            try {
+                $emailStmt = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+                $emailStmt->execute([$_SESSION['user_id']]);
+                $user = $emailStmt->fetch();
+                
+                if ($user && !empty($user['email'])) {
+                    $emailHelper = new TrainMeEmail();
+                    $emailHelper->sendTestResultsEmail(
+                        $user['email'],
+                        $_SESSION['user_name'] ?? 'Employee',
+                        'Data Protection',
+                        $score,
+                        $total
+                    );
+                }
+            } catch (Exception $e) {
+                error_log("Test results email error: " . $e->getMessage());
+            } catch (Throwable $e) {
+                error_log("Test results email error: " . $e->getMessage());
+            }
         } catch (PDOException $e) {
             error_log("Error saving training progress: " . $e->getMessage());
         }
